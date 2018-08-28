@@ -24,7 +24,7 @@ export class HtmlPlus {
     return meta ? [meta, input.content].join('\n') : input.content;
   }
 
-  static parse(content: string): HtmlPlusInterface {
+  static parse(content: string = ''): HtmlPlusInterface {
     let lineStart = 0;
     let lineEnd = 0;
     let currentLine = '';

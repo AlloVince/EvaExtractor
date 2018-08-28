@@ -1,5 +1,5 @@
 {
-  "name": "EvaExtractor",
+  "name": "evaextractor",
   "version": "0.0.0-development",
   "description": "",
   "main": "index.js",
@@ -7,6 +7,7 @@
     "ava": "LOG_LEVEL=error NODE_ENV=test ava --verbose --serial",
     "test": "nyc -a --reporter=lcov --reporter=text --reporter=html npm run ava",
     "lint": "tslint src/**/*.ts --exclude '**/*.d.ts' --project tsconfig.json",
+    "watch": "tsc -w",
     "build": "rm -rf lib && tsc -m \"System\" --outFile \"lib/index\" --sourceMap \"false\" && rm lib/index && mv lib/index.d.ts ./ && tsc",
     "semantic-release": "semantic-release",
     "travis-deploy-once": "travis-deploy-once"

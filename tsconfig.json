@@ -14,10 +14,9 @@
     "declaration": true,
     "baseUrl": ".",
     "skipLibCheck": true,
-//    "lib": [
-//      "es2018",
-//      "esnext.asynciterable"
-//    ],
+    "lib": [
+      "esnext"
+    ],
     "paths": {
       "*": [
         "src/@types/*",
@@ -26,7 +25,8 @@
     }
   },
   "exclude": [
-    "examples/",
+    "lib",
+    "examples",
     "node_modules",
     "test"
   ]
