@@ -60,7 +60,7 @@
   ],
   "dependencies": {},
   "peerDependencies": {
-    "ali-oss": "^6.0.1",
+    "ali-oss": "^5.3.1",
     "cheerio": "^1.0.0-rc.2",
     "fast-glob": "^2.2.2"
   },
@@ -70,10 +70,10 @@
     "@types/node": "^10.5.6",
     "@types/sequelize": "^4.27.25",
     "ava": "^1.0.0-beta.6",
-    "nyc": "^12.0.2",
+    "nyc": "^13.0.1",
     "pre-commit": "^1.2.2",
-    "semantic-release": "^15.9.3",
-    "travis-deploy-once": "^5.0.1",
+    "semantic-release": "^15.9.12",
+    "travis-deploy-once": "^5.0.4",
     "ts-node": "^7.0.0",
     "tslint": "^5.11.0",
     "tslint-config-airbnb": "^5.9.2",

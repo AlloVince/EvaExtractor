@@ -156,6 +156,8 @@ abstract class AbstractProcessor {
     return [
       '-----META_ITEM-----',
       this.metaItem,
+      '-----META_ITEM-=>FETCHED_ITEM-----',
+      this.fetchedItem,
       '-----META_ITEM-=>PARSED_ITEM-----',
       this.parsedItem,
       '-----PARSED_ITEM-=>EXTRACTED_ITEM-----',
