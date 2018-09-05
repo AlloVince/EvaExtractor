@@ -58,15 +58,20 @@
   "pre-commit": [
     "lint"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "get-stream": "^4.0.0"
+  },
   "peerDependencies": {
     "ali-oss": "^5.3.1",
-    "cheerio": "^1.0.0-rc.2",
-    "fast-glob": "^2.2.2"
+    "fast-glob": "^2.2.2",
+    "minio": "^7.0.0"
   },
   "devDependencies": {
     "@types/cheerio": "^0.22.9",
+    "@types/get-stream": "^3.0.1",
     "@types/lodash": "^4.14.116",
+    "@types/minio": "^6.0.2",
     "@types/node": "^10.5.6",
     "@types/sequelize": "^4.27.25",
     "ava": "^1.0.0-beta.6",

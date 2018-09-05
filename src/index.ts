@@ -1,7 +1,7 @@
 import assert from 'assert';
 import cheerio from 'cheerio';
 import { HtmlPlus, pipe } from './utils';
-import { FetcherInterface, FileFetcher, HttpFetcher, OssFetcher } from './fetchers';
+import { FetcherInterface, FileFetcher, HttpFetcher, OssFetcher, MinioFetcher } from './fetchers';
 
 export enum STORAGES {
   FILE = 'file',
@@ -173,14 +173,15 @@ abstract class AbstractProcessor {
 }
 
 export const factoryFetcher = (storage: STORAGES, mapping: {
-  [x: string]: any;
+  [x: string]: any[];
 }): FetcherInterface => {
   const fetcherClass: Constructor = ({
     file: FileFetcher,
     oss: OssFetcher,
     http: HttpFetcher,
+    s3: MinioFetcher,
   })[storage];
-  return new fetcherClass(mapping[storage]);
+  return new fetcherClass(...mapping[storage]);
 };
 
 export class HtmlProcessor extends AbstractProcessor implements ProcessorInterface {

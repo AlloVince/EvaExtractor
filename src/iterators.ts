@@ -24,6 +24,25 @@ export class FileIterator implements IteratorInterface {
   }
 }
 
+export class MinioIterator implements IteratorInterface {
+  minio: any;
+  defaultBucket: string;
+
+  constructor(minio: any, defaultBucket?: string) {
+    this.minio = minio;
+    this.defaultBucket = defaultBucket;
+  }
+
+  async* getItems(
+    { prefix = '', bucket }: { prefix: string, bucket?: string },
+  ): AsyncIterableIterator<{ file: { name: string | Buffer } }> {
+    const stream = this.minio.listObjectsV2(bucket || this.defaultBucket, prefix, true);
+    for await (const item of stream) {
+      yield { file: item };
+    }
+  }
+}
+
 export class OssIterator implements IteratorInterface {
   oss: any;
   objects: any[];

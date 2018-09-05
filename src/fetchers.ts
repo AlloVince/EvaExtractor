@@ -1,4 +1,5 @@
 import { promises as fs } from 'fs';
+import getStream from 'get-stream';
 
 export interface FetcherInterface {
   fetcher: any;
@@ -39,5 +40,21 @@ export class HttpFetcher implements FetcherInterface {
   async fetch(uri: string): Promise<string> {
     const { body } = await this.fetcher.request(uri);
     return body;
+  }
+}
+
+export class MinioFetcher implements FetcherInterface {
+  fetcher: any;
+  bucket: string;
+
+  constructor(client: any, bucket: string) {
+    this.fetcher = client;
+    this.bucket = bucket;
+  }
+
+  async fetch(uri: string): Promise<string> {
+    const stream = await this.fetcher.getObject(this.bucket, uri);
+    const res: string = await getStream(stream);
+    return res;
   }
 }
