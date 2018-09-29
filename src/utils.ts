@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 interface Callable {
   (input: any): any;
 }
@@ -56,3 +58,19 @@ export class HtmlPlus {
     );
   }
 }
+
+export const hashUrlToPath = (uri: string, depth: number = 3, extension: string = 'html') => {
+  const hash = crypto.createHash('md5').update(uri).digest('hex');
+  const blockSize = 2;
+  const blocks = hash.split('');
+  const paths = [];
+  let i;
+  for (i = 0; i < depth; i += 1) {
+    paths.push(blocks.slice(i * blockSize, (i + 1) * blockSize).join(''));
+  }
+  const filename = `${blocks.slice(i * blockSize).join('')}.${extension}`;
+  const folder = paths.join('/');
+  paths.push(filename);
+
+  return { hash, filename, folder, relative: paths.join('/') };
+};

@@ -1,7 +1,7 @@
 {
   "name": "evaextractor",
   "version": "0.0.0-development",
-  "description": "",
+  "description": "A toolset for store/extract/transfer/iterator data in local disk/Ali cloud oss/AWS S3/minio",
   "main": "index.js",
   "scripts": {
     "ava": "LOG_LEVEL=error NODE_ENV=test ava --verbose --serial",
@@ -60,7 +60,8 @@
   ],
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
-    "get-stream": "^4.0.0"
+    "get-stream": "^4.0.0",
+    "mkdirp": "^0.5.1"
   },
   "peerDependencies": {
     "ali-oss": "^5.3.1",
@@ -71,17 +72,18 @@
     "@types/cheerio": "^0.22.9",
     "@types/get-stream": "^3.0.1",
     "@types/lodash": "^4.14.116",
-    "@types/minio": "^6.0.2",
-    "@types/node": "^10.5.6",
-    "@types/sequelize": "^4.27.25",
-    "ava": "^1.0.0-beta.6",
+    "@types/minio": "^7.0.0",
+    "@types/mkdirp": "^0.5.2",
+    "@types/node": "^10.11.3",
+    "@types/sequelize": "^4.27.26",
+    "ava": "^1.0.0-beta.8",
     "nyc": "^13.0.1",
     "pre-commit": "^1.2.2",
-    "semantic-release": "^15.9.12",
-    "travis-deploy-once": "^5.0.4",
+    "semantic-release": "^15.9.16",
+    "travis-deploy-once": "^5.0.9",
     "ts-node": "^7.0.0",
     "tslint": "^5.11.0",
-    "tslint-config-airbnb": "^5.9.2",
-    "typescript": "^3.0.1"
+    "tslint-config-airbnb": "^5.11.0",
+    "typescript": "^3.1.1"
   }
 }

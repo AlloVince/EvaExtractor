@@ -1,5 +1,5 @@
 import test from 'ava';
-import { HtmlPlus } from '../src/utils';
+import { HtmlPlus, hashUrlToPath } from '../src/utils';
 
 test('HTMLPlus stringify', async (t) => {
   t.is(
@@ -53,5 +53,21 @@ test('HTMLPlus parse', async (t) => {
     key1: 'value1',
     key2: '2',
     content: 'foo',
+  });
+});
+
+test('Hash url to path', async (t) => {
+  t.deepEqual(hashUrlToPath('http://example.com', 0, 'json'), {
+    filename: 'a9b9f04336ce0181a08e774e01113b31.json',
+    hash: 'a9b9f04336ce0181a08e774e01113b31',
+    folder: '',
+    relative: 'a9b9f04336ce0181a08e774e01113b31.json',
+  });
+
+  t.deepEqual(hashUrlToPath('http://example.com', 3, 'html'), {
+    filename: '4336ce0181a08e774e01113b31.html',
+    hash: 'a9b9f04336ce0181a08e774e01113b31',
+    folder: 'a9/b9/f0',
+    relative: 'a9/b9/f0/4336ce0181a08e774e01113b31.html',
   });
 });
