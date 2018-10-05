@@ -61,11 +61,11 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "get-stream": "^4.0.0",
+    "fast-glob": "^2.2.2",
     "mkdirp": "^0.5.1"
   },
   "peerDependencies": {
     "ali-oss": "^5.3.1",
-    "fast-glob": "^2.2.2",
     "minio": "^7.0.0"
   },
   "devDependencies": {
