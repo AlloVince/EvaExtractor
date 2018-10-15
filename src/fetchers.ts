@@ -4,7 +4,9 @@ import getStream from 'get-stream';
 export interface FetcherInterface {
   fetcher: any;
 
-  fetch(uri: string): Promise<any>;
+  fetch(uri: string): Promise<string>;
+
+  fetchBuffer(uri: string): Promise<Buffer>;
 }
 
 export class FileFetcher implements FetcherInterface {
@@ -14,6 +16,12 @@ export class FileFetcher implements FetcherInterface {
     const fullpath = process.env.FILE_FETCHER_ROOT ?
       [process.env.FILE_FETCHER_ROOT, uri].join('/') : uri;
     return fs.readFile(fullpath, 'utf8');
+  }
+
+  async fetchBuffer(uri: string): Promise<Buffer> {
+    const fullpath = process.env.FILE_FETCHER_ROOT ?
+      [process.env.FILE_FETCHER_ROOT, uri].join('/') : uri;
+    return fs.readFile(fullpath);
   }
 }
 
@@ -28,6 +36,11 @@ export class OssFetcher implements FetcherInterface {
     const { content } = await this.fetcher.get(uri);
     return content.toString();
   }
+
+  async fetchBuffer(uri: string): Promise<Buffer> {
+    const { content } = await this.fetcher.get(uri);
+    return content;
+  }
 }
 
 export class HttpFetcher implements FetcherInterface {
@@ -40,6 +53,11 @@ export class HttpFetcher implements FetcherInterface {
   async fetch(uri: string): Promise<string> {
     const { body } = await this.fetcher.request(uri);
     return body;
+  }
+
+  async fetchBuffer(uri: string): Promise<Buffer> {
+    const { body } = await this.fetcher.request(uri);
+    return Buffer.from(body);
   }
 }
 
@@ -54,7 +72,11 @@ export class MinioFetcher implements FetcherInterface {
 
   async fetch(uri: string): Promise<string> {
     const stream = await this.fetcher.getObject(this.bucket, uri);
-    const res: string = await getStream(stream);
-    return res;
+    return getStream(stream);
+  }
+
+  async fetchBuffer(uri: string): Promise<Buffer> {
+    const stream = await this.fetcher.getObject(this.bucket, uri);
+    return getStream.buffer(stream);
   }
 }
