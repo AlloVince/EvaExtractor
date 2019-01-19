@@ -38,7 +38,7 @@ export class MinioIterator implements IteratorInterface {
       prefix = '',
       startCursor = '',
       bucket,
-    }: { prefix: string, startCursor: string, bucket?: string },
+    }: { prefix: string, startCursor?: string, bucket?: string },
   ): AsyncIterableIterator<{ file: { name: string | Buffer } }> {
     const stream = this.minio.listObjectsV2(
       bucket || this.defaultBucket,
