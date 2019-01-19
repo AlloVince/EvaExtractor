@@ -34,9 +34,18 @@ export class MinioIterator implements IteratorInterface {
   }
 
   async* getItems(
-    { prefix = '', bucket }: { prefix: string, bucket?: string },
+    {
+      prefix = '',
+      startCursor = '',
+      bucket,
+    }: { prefix: string, startCursor: string, bucket?: string },
   ): AsyncIterableIterator<{ file: { name: string | Buffer } }> {
-    const stream = this.minio.listObjectsV2(bucket || this.defaultBucket, prefix, true);
+    const stream = this.minio.listObjectsV2(
+      bucket || this.defaultBucket,
+      prefix,
+      true,
+      startCursor,
+    );
     for await (const item of stream) {
       yield { file: item };
     }

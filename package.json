@@ -60,30 +60,31 @@
   ],
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
-    "get-stream": "^4.0.0",
-    "fast-glob": "^2.2.2",
+    "fast-glob": "^2.2.6",
+    "get-stream": "^4.1.0",
+    "minio": "^7.0.3",
     "mkdirp": "^0.5.1"
   },
   "peerDependencies": {
     "ali-oss": "^5.3.1",
-    "minio": "^7.0.0"
+    "minio": "^7.0.3"
   },
   "devDependencies": {
-    "@types/cheerio": "^0.22.9",
+    "@types/cheerio": "^0.22.10",
     "@types/get-stream": "^3.0.1",
-    "@types/lodash": "^4.14.116",
-    "@types/minio": "^7.0.0",
+    "@types/lodash": "^4.14.120",
+    "@types/minio": "^7.0.1",
     "@types/mkdirp": "^0.5.2",
-    "@types/node": "^10.11.3",
-    "@types/sequelize": "^4.27.26",
-    "ava": "^1.0.0-beta.8",
-    "nyc": "^13.0.1",
+    "@types/node": "^10.12.18",
+    "@types/sequelize": "^4.27.34",
+    "ava": "^1.1.0",
+    "nyc": "^13.1.0",
     "pre-commit": "^1.2.2",
-    "semantic-release": "^15.9.16",
-    "travis-deploy-once": "^5.0.9",
+    "semantic-release": "^15.13.3",
+    "travis-deploy-once": "^5.0.11",
     "ts-node": "^7.0.0",
-    "tslint": "^5.11.0",
-    "tslint-config-airbnb": "^5.11.0",
-    "typescript": "^3.1.1"
+    "tslint": "^5.12.1",
+    "tslint-config-airbnb": "^5.11.1",
+    "typescript": "^3.2.4"
   }
 }
