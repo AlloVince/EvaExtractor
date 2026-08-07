@@ -1,8 +1,8 @@
 import { MinioIterator } from '../src/iterators';
 import { MinioFetcher } from '../src/fetchers';
+import Minio from 'minio';
 
-const minio = require('minio');
-const client = new minio.Client({
+const client = new Minio.Client({
   endPoint: '',
   port: 9000,
   useSSL: false,

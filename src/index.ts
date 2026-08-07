@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio';
 import { HtmlPlus, pipe } from './utils';
-import { FetcherInterface, FileFetcher, HttpFetcher, OssFetcher, MinioFetcher } from './fetchers';
+import { FileFetcher, HttpFetcher, OssFetcher, MinioFetcher } from './fetchers';
+import type { FetcherInterface } from './fetchers';
 
 export enum STORAGES {
   FILE = 'file',

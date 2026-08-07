@@ -68,7 +68,7 @@ export class OssIterator implements IteratorInterface {
   async* getItems(
     {
       prefix,
-      startCursor,
+      startCursor = '',
       max = -1,
     }: { prefix: string, startCursor?: string, max?: number },
   ): AsyncIterableIterator<{

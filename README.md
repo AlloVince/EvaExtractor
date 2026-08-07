@@ -38,6 +38,10 @@ pnpm run lint
 pnpm run build
 ```
 
+CI also runs semantic release on `master` pushes, using conventional commits to
+drive versioning and release notes. Publishing requires `NPM_TOKEN` in GitHub
+Actions.
+
 ## Documentation
 
 - `AGENTS.md` contains the development guide and AI-facing project rules.
