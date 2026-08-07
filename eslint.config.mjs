@@ -7,6 +7,7 @@ export default tseslint.config(
       'lib/**',
       'node_modules/**',
       '*.js',
+      '*.cjs',
     ],
   },
   js.configs.recommended,
