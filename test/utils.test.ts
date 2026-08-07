@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import test from 'node:test';
-import { HtmlPlus, hashUrlToPath, pipe } from '../src/utils';
-import { humanFileSizeToBytes } from '../src/transfers';
+import { HtmlPlus, hashUrlToPath, pipe } from '../utils.js';
+import { humanFileSizeToBytes } from '../transfers.js';
 
 test('HtmlPlus.stringify preserves content and metadata order', () => {
   assert.equal(HtmlPlus.stringify({ content: '' }), '');

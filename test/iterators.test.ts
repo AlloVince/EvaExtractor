@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { DatabaseIterator, FileIterator, ORDER } from '../src/iterators';
+import { DatabaseIterator, FileIterator, ORDER } from '../iterators.js';
 
 test('FileIterator yields matching html files', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'evaextractor-'));
