@@ -1,7 +1,7 @@
 import js from '@eslint/js';
-import babelParser from '@babel/eslint-parser';
+import tseslint from 'typescript-eslint';
 
-export default [
+export default tseslint.config(
   {
     ignores: [
       'lib/**',
@@ -10,24 +10,16 @@ export default [
     ],
   },
   js.configs.recommended,
+  ...tseslint.configs.recommended,
   {
     files: ['src/**/*.ts', 'test/**/*.ts'],
-    languageOptions: {
-      parser: babelParser,
-      parserOptions: {
-        requireConfigFile: false,
-        babelOptions: {
-          plugins: ['@babel/plugin-syntax-typescript'],
-        },
-        sourceType: 'module',
-        ecmaVersion: 'latest',
-      },
-    },
     rules: {
-      'no-unused-vars': [
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
     },
   },
-];
+);
