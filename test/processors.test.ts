@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
 import test from 'node:test';
-import { HtmlProcessor, JsonProcessor, STORAGES } from '../index.js';
+import { HtmlProcessor, JsonProcessor, STORAGES } from '../index';
 
 test('HtmlProcessor extracts from parsed html', async () => {
   const fetcher = {
