@@ -19,13 +19,13 @@ export class FileStorage implements StorageInterface {
   }
 
   async access(relative: string) {
-    const localPath = `${this.root}/${relative}`;
+    const localPath = path.join(this.root, relative);
     await fsPromise.access(localPath);
     return localPath;
   }
 
   async write(relative: string, content: string) {
-    const localPath = `${this.root}/${relative}`;
+    const localPath = path.join(this.root, relative);
     await fsPromise.mkdir(path.dirname(localPath), { recursive: true });
     await fsPromise.writeFile(localPath, content);
     return localPath;
@@ -42,13 +42,13 @@ export class OssStorage {
   }
 
   async access(relative: string) {
-    const localPath = `${this.root}/${relative}`;
+    const localPath = path.join(this.root, relative);
     await this.store.head(localPath);
     return localPath;
   }
 
   async write(relative: string, content: string) {
-    const localPath = `${this.root}/${relative}`;
+    const localPath = path.join(this.root, relative);
     await this.store.put(localPath, Buffer.from(content));
     return localPath;
   }
@@ -66,12 +66,12 @@ export class MinioStorage {
   }
 
   async access(relative: string) {
-    const localPath = `${this.root}/${relative}`;
+    const localPath = path.join(this.root, relative);
     return this.store.statObject(this.bucket, localPath);
   }
 
   async write(relative: string, content: string, meta: any) {
-    const localPath = `${this.root}/${relative}`;
+    const localPath = path.join(this.root, relative);
     await this.store.putObject(this.bucket, localPath, Buffer.from(content), meta);
     return localPath;
   }

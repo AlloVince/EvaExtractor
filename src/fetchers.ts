@@ -1,4 +1,5 @@
 import { promises as fs } from 'node:fs';
+import path from 'node:path';
 import { buffer as streamBuffer, text as streamText } from 'node:stream/consumers';
 
 export interface FetcherInterface {
@@ -14,13 +15,13 @@ export class FileFetcher implements FetcherInterface {
 
   async fetch(uri: string): Promise<string> {
     const root = process.env['FILE_FETCHER_ROOT'];
-    const fullpath = root ? [root, uri].join('/') : uri;
+    const fullpath = root ? path.join(root, uri) : uri;
     return fs.readFile(fullpath, 'utf8');
   }
 
   async fetchBuffer(uri: string): Promise<Buffer> {
     const root = process.env['FILE_FETCHER_ROOT'];
-    const fullpath = root ? [root, uri].join('/') : uri;
+    const fullpath = root ? path.join(root, uri) : uri;
     return fs.readFile(fullpath);
   }
 }

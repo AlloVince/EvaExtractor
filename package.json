@@ -2,7 +2,19 @@
   "name": "evaextractor",
   "version": "0.0.0-development",
   "description": "A toolset for store/extract/transfer/iterator data in local disk/Ali cloud oss/AWS S3/minio",
-  "main": "index.js",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
+  "files": [
+    "lib",
+    "README.md",
+    "LICENSE"
+  ],
   "packageManager": "pnpm@10.14.0",
   "scripts": {
     "test": "npm run build && node --test \"lib/test/**/*.js\"",

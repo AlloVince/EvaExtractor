@@ -1,14 +1,14 @@
 import crypto from 'node:crypto';
 
 interface Callable {
-  (input: any): any;
+  (input: unknown): unknown;
 }
 
 export const pipe = (...ops: Callable[]) => ops.reduce((a: Callable, b: Callable) => {
-  return (arg: any): any => {
+  return (arg: unknown): unknown => {
     return b(a(arg));
   };
-}, (value: any) => value);
+}, (value: unknown) => value);
 
 interface HtmlPlusInterface {
   [x: string]: any;
@@ -53,7 +53,7 @@ export class HtmlPlus {
     return Object.assign(
       parsedItem,
       {
-        content: content.substr(lineStart),
+        content: content.slice(lineStart),
       },
     );
   }

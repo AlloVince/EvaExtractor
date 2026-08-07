@@ -1,6 +1,7 @@
 import { strict as assert } from 'node:assert';
 import test from 'node:test';
 import { HtmlPlus, hashUrlToPath, pipe } from '../src/utils';
+import { humanFileSizeToBytes } from '../src/transfers';
 
 test('HtmlPlus.stringify preserves content and metadata order', () => {
   assert.equal(HtmlPlus.stringify({ content: '' }), '');
@@ -47,4 +48,10 @@ test('pipe composes left to right', () => {
   const add1 = (value: number) => value + 1;
   const double = (value: number) => value * 2;
   assert.equal(pipe(add1, double)(2), 6);
+});
+
+test('humanFileSizeToBytes handles valid and invalid input', () => {
+  assert.equal(humanFileSizeToBytes('1KB'), 1000);
+  assert.equal(humanFileSizeToBytes('1Mb'), 125000);
+  assert.ok(Number.isNaN(humanFileSizeToBytes('')));
 });

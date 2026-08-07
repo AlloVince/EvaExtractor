@@ -8,7 +8,7 @@ export enum STORAGES {
   HTTP = 'http',
 }
 
-export type Constructor = (new (...args: any[]) => any);
+export type Constructor = new (...args: any[]) => any;
 export type ExtractRule =
   ($: any, item: ParsedItemInterface, processor?: ProcessorInterface) => any;
 export type TransferRule = (item: any, processor?: ProcessorInterface) => any;
@@ -30,7 +30,7 @@ export interface ParsedItemInterface {
   timestamp?: string;
   content: string | object;
 
-  [x: string]: any;
+  [x: string]: unknown;
 }
 
 export interface ExtractRulesInterface {
@@ -51,7 +51,7 @@ export interface ProcessorInterface {
   transferedItem: object;
   loadItem: object;
 
-  process(): any;
+  process(): Promise<this>;
 
   fetch(): this | Promise<this>;
 
@@ -231,9 +231,9 @@ export class HtmlProcessor extends AbstractProcessor implements ProcessorInterfa
     this.extractedItem = Object
       .entries(this.getExtractRules())
       .map(
-        ([key, rule]) => [key, typeof rule === 'function' ? rule($, this.parsedItem) : rule],
+    ([key, rule]) => [key, typeof rule === 'function' ? rule($, this.parsedItem) : rule],
       )
-      .reduce((obj, [k, v]) => ({ ...obj, [k]: v }), {});
+      .reduce<Record<string, unknown>>((obj, [k, v]) => ({ ...obj, [k]: v }), {});
     return this;
   }
 
@@ -250,7 +250,7 @@ export class HtmlProcessor extends AbstractProcessor implements ProcessorInterfa
         ([key, value]: [string, any]) =>
           (rules[key] ? [key, pipe(...rules[key])(value)] : [key, value]),
       )
-      .reduce((obj, [k, v]) => ({ ...obj, [k]: v }), {});
+      .reduce<Record<string, unknown>>((obj, [k, v]) => ({ ...obj, [k]: v }), {});
     return this;
   }
 

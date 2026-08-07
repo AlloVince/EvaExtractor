@@ -11,7 +11,7 @@ export enum ORDER {
 
 export class FileIterator implements IteratorInterface {
   async* getItems(
-    { prefix, pattern = '**/*.html' }: { prefix: string, pattern: string },
+    { prefix, pattern = '**/*.html' }: { prefix: string, pattern?: string },
   ): AsyncIterableIterator<{ file: { name: string | Buffer } }> {
     const stream = fg.stream([prefix, pattern].join(prefix.endsWith('/') ? '' : '/'));
     for await (const name of stream) {
@@ -38,7 +38,7 @@ export class MinioIterator implements IteratorInterface {
       prefix = '',
       startCursor = '',
       bucket,
-    }: { prefix: string, startCursor?: string, bucket?: string },
+    }: { prefix?: string, startCursor?: string, bucket?: string },
   ): AsyncIterableIterator<{ file: { name: string | Buffer } }> {
     const stream = this.minio.listObjectsV2(
       bucket || this.defaultBucket,
@@ -70,7 +70,7 @@ export class OssIterator implements IteratorInterface {
       prefix,
       startCursor,
       max = -1,
-    }: { prefix: string, startCursor: string, max: number },
+    }: { prefix: string, startCursor?: string, max?: number },
   ): AsyncIterableIterator<{
     count: number, pageOffset: number, file: string, cursor: string, nextCursor: string,
   }> {

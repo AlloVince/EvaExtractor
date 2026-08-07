@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { FileIterator } from '../src/iterators';
+import { DatabaseIterator, FileIterator, ORDER } from '../src/iterators';
 
 test('FileIterator yields matching html files', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'evaextractor-'));
@@ -26,4 +26,37 @@ test('FileIterator yields matching html files', async () => {
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test('DatabaseIterator pages through results', async () => {
+  const calls: Array<{ offset: number, limit: number }> = [];
+  const entity = {
+    async findAll({ offset, limit }: { offset: number, limit: number }) {
+      calls.push({ offset, limit });
+      if (offset === 0) {
+        return [{ id: 1 }, { id: 2 }];
+      }
+      if (offset === 2) {
+        return [{ id: 3 }];
+      }
+      return [];
+    },
+  };
+
+  const iterator = new DatabaseIterator(entity, 'id', 2);
+  const results = [];
+  for await (const item of iterator.getItems({
+    startCursor: 0,
+    whereCondition: {},
+    direction: ORDER.ASC,
+  })) {
+    results.push(item);
+  }
+
+  assert.deepEqual(results, [{ id: 1 }, { id: 2 }, { id: 3 }]);
+  assert.deepEqual(calls, [
+    { offset: 0, limit: 2 },
+    { offset: 2, limit: 2 },
+    { offset: 4, limit: 2 },
+  ]);
 });
