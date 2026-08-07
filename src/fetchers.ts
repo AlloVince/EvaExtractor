@@ -1,5 +1,5 @@
-import { promises as fs } from 'fs';
-import getStream from 'get-stream';
+import { promises as fs } from 'node:fs';
+import { buffer as streamBuffer, text as streamText } from 'node:stream/consumers';
 
 export interface FetcherInterface {
   fetcher: any;
@@ -72,11 +72,11 @@ export class MinioFetcher implements FetcherInterface {
 
   async fetch(uri: string): Promise<string> {
     const stream = await this.fetcher.getObject(this.bucket, uri);
-    return getStream(stream);
+    return streamText(stream);
   }
 
   async fetchBuffer(uri: string): Promise<Buffer> {
     const stream = await this.fetcher.getObject(this.bucket, uri);
-    return getStream.buffer(stream);
+    return streamBuffer(stream);
   }
 }

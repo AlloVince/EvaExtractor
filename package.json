@@ -3,14 +3,12 @@
   "version": "0.0.0-development",
   "description": "A toolset for store/extract/transfer/iterator data in local disk/Ali cloud oss/AWS S3/minio",
   "main": "index.js",
+  "packageManager": "pnpm@10.14.0",
   "scripts": {
-    "ava": "LOG_LEVEL=error NODE_ENV=test ava --verbose --serial",
-    "test": "nyc -a --reporter=lcov --reporter=text --reporter=html npm run ava",
-    "lint": "tslint src/**/*.ts --exclude '**/*.d.ts' --project tsconfig.json",
+    "test": "ava --verbose --serial",
+    "lint": "tsc --noEmit",
     "watch": "tsc -w",
-    "build": "rm -rf lib && tsc -m \"System\" --outFile \"lib/index\" --sourceMap \"false\" && rm lib/index && mv lib/index.d.ts ./ && tsc",
-    "semantic-release": "semantic-release",
-    "travis-deploy-once": "travis-deploy-once"
+    "build": "rm -rf lib && tsc"
   },
   "repository": {
     "type": "git",
@@ -21,7 +19,7 @@
   "author": "",
   "homepage": "",
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=24.0.0"
   },
   "ava": {
     "files": [
@@ -40,51 +38,18 @@
     ],
     "babel": false
   },
-  "nyc": {
-    "extension": [
-      ".ts"
-    ],
-    "require": [
-      "ts-node/register"
-    ],
-    "include": [
-      "src/**/*.ts"
-    ],
-    "exclude": [
-      "lib/**/*"
-    ],
-    "sourceMap": true
-  },
-  "pre-commit": [
-    "lint"
-  ],
   "dependencies": {
-    "cheerio": "^1.0.0-rc.2",
-    "fast-glob": "^2.2.6",
-    "get-stream": "^4.1.0",
-    "minio": "^7.0.3",
-    "mkdirp": "^0.5.1"
+    "cheerio": "^1.2.0",
+    "fast-glob": "^3.3.3"
   },
   "peerDependencies": {
-    "ali-oss": "^5.3.1",
-    "minio": "^7.0.3"
+    "ali-oss": "^6.23.0",
+    "minio": "^8.0.7"
   },
   "devDependencies": {
-    "@types/cheerio": "^0.22.10",
-    "@types/get-stream": "^3.0.1",
-    "@types/lodash": "^4.14.120",
-    "@types/minio": "^7.0.1",
-    "@types/mkdirp": "^0.5.2",
-    "@types/node": "^10.12.18",
-    "@types/sequelize": "^4.27.34",
-    "ava": "^1.1.0",
-    "nyc": "^13.1.0",
-    "pre-commit": "^1.2.2",
-    "semantic-release": "^15.13.3",
-    "travis-deploy-once": "^5.0.11",
-    "ts-node": "^7.0.0",
-    "tslint": "^5.12.1",
-    "tslint-config-airbnb": "^5.11.1",
-    "typescript": "^3.2.4"
+    "@types/node": "^26.1.2",
+    "ava": "^8.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^7.0.2"
   }
 }

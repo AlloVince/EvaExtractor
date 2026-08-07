@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 interface Callable {
   (input: any): any;
@@ -8,7 +8,7 @@ export const pipe = (...ops: Callable[]) => ops.reduce((a: Callable, b: Callable
   return (arg: any): any => {
     return b(a(arg));
   };
-});
+}, (value: any) => value);
 
 interface HtmlPlusInterface {
   [x: string]: any;

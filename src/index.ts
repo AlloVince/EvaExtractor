@@ -1,5 +1,4 @@
-import assert from 'assert';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 import { HtmlPlus, pipe } from './utils';
 import { FetcherInterface, FileFetcher, HttpFetcher, OssFetcher, MinioFetcher } from './fetchers';
 
@@ -66,37 +65,37 @@ export interface ProcessorInterface {
 }
 
 abstract class AbstractProcessor {
-  fetcher: FetcherInterface;
-  extractRules: {};
-  transferRules: {};
-  metaItem: MetaItemInterface;
-  fetchedItem: FetchedItemInterface;
-  parsedItem: ParsedItemInterface;
-  extractedItem: object;
-  transferedItem: object;
-  loadItem: object;
+  fetcher!: FetcherInterface;
+  extractRules: Record<string, ExtractRule | ExtractRulesInterface> = {};
+  transferRules: Record<string, TransferRule[]> = {};
+  metaItem!: MetaItemInterface;
+  fetchedItem!: FetchedItemInterface;
+  parsedItem!: ParsedItemInterface;
+  extractedItem!: Record<string, any>;
+  transferedItem!: Record<string, any>;
+  loadItem!: Record<string, any>;
 
-  async fetch() {
+  async fetch(): Promise<this> {
     return this;
   }
 
-  async parse() {
+  async parse(): Promise<this> {
     return this;
   }
 
-  async extract() {
+  async extract(): Promise<this> {
     return this;
   }
 
-  async transfer() {
+  async transfer(): Promise<this> {
     return this;
   }
 
-  async load() {
+  async load(): Promise<this> {
     return this;
   }
 
-  async process() {
+  async process(): Promise<this> {
     await this.fetch();
     await this.parse();
     await this.extract();
@@ -112,47 +111,47 @@ abstract class AbstractProcessor {
     return this.transferRules;
   }
 
-  setFetchedItem(item: FetchedItemInterface) {
+  setFetchedItem(item: FetchedItemInterface): this {
     this.fetchedItem = item;
     return this;
   }
 
-  getFetchedItem() {
+  getFetchedItem(): FetchedItemInterface {
     return this.fetchedItem;
   }
 
-  setParsedItem(item: ParsedItemInterface) {
+  setParsedItem(item: ParsedItemInterface): this {
     this.parsedItem = item;
     return this;
   }
 
-  getParsedItem() {
+  getParsedItem(): ParsedItemInterface {
     return this.parsedItem;
   }
 
-  setExtractedItem(item: any) {
+  setExtractedItem(item: any): this {
     this.extractedItem = item;
     return this;
   }
 
-  getExtractedItem() {
+  getExtractedItem(): Record<string, any> {
     return this.extractedItem;
   }
 
-  setTransferedItem(item: any) {
+  setTransferedItem(item: any): this {
     this.transferedItem = item;
     return this;
   }
 
-  getTransferedItem() {
+  getTransferedItem(): Record<string, any> {
     return this.transferedItem;
   }
 
-  getLoadItem() {
+  getLoadItem(): Record<string, any> {
     return this.loadItem;
   }
 
-  debug() {
+  debug(): any[] {
     return [
       '-----META_ITEM-----',
       this.metaItem,
@@ -167,7 +166,7 @@ abstract class AbstractProcessor {
     ];
   }
 
-  output() {
+  output(): Record<string, any> {
     return this.transferedItem;
   }
 }
@@ -196,7 +195,7 @@ export class HtmlProcessor extends AbstractProcessor implements ProcessorInterfa
    * MetaItem convert to FetchedItem
    * @returns {Promise<this>}
    */
-  async fetch() {
+  override async fetch(): Promise<this> {
     const { storage, uri } = this.metaItem;
     this.fetchedItem = {
       storage,
@@ -210,7 +209,7 @@ export class HtmlProcessor extends AbstractProcessor implements ProcessorInterfa
    * FetchedItem convert to ParsedItem
    * @returns {Promise<this>}
    */
-  async parse() {
+  override async parse(): Promise<this> {
     const { content } = this.fetchedItem;
     this.parsedItem = Object.assign(
       {
@@ -227,7 +226,7 @@ export class HtmlProcessor extends AbstractProcessor implements ProcessorInterfa
    * ParsedItem convert to ExtractedItem
    * @returns {Promise<this>}
    */
-  async extract() {
+  override async extract(): Promise<this> {
     const $ = cheerio.load(this.parsedItem.content.toString());
     this.extractedItem = Object
       .entries(this.getExtractRules())
@@ -242,7 +241,7 @@ export class HtmlProcessor extends AbstractProcessor implements ProcessorInterfa
    * ExtractedItem convert to TransferedItem
    * @returns {Promise<this>}
    */
-  async transfer() {
+  override async transfer(): Promise<this> {
     const rules = this.getTransferRules();
 
     this.transferedItem = Object
@@ -258,9 +257,8 @@ export class HtmlProcessor extends AbstractProcessor implements ProcessorInterfa
   /**
    * @returns {Promise<this>}
    */
-  async load() {
-    assert(false, 'load require override in child class');
-    return this;
+  override async load(): Promise<this> {
+    throw new Error('load require override in child class');
   }
 }
 
@@ -276,7 +274,7 @@ export class JsonProcessor extends AbstractProcessor implements ProcessorInterfa
    * MetaItem convert to FetchedItem
    * @returns {Promise<this>}
    */
-  async fetch() {
+  override async fetch(): Promise<this> {
     const { storage, uri } = this.metaItem;
     this.fetchedItem = {
       storage,
@@ -290,7 +288,7 @@ export class JsonProcessor extends AbstractProcessor implements ProcessorInterfa
    * FetchedItem convert to ParsedItem
    * @returns {Promise<this>}
    */
-  async parse() {
+  override async parse(): Promise<this> {
     const { content } = this.fetchedItem;
     this.parsedItem = Object.assign(
       {
@@ -307,7 +305,7 @@ export class JsonProcessor extends AbstractProcessor implements ProcessorInterfa
    * ParsedItem convert to ExtractedItem
    * @returns {Promise<this>}
    */
-  async extract() {
+  override async extract(): Promise<this> {
     this.extractedItem = this.parsedItem;
     return this;
   }
@@ -316,7 +314,7 @@ export class JsonProcessor extends AbstractProcessor implements ProcessorInterfa
    * ExtractedItem convert to TransferedItem
    * @returns {Promise<this>}
    */
-  async transfer() {
+  override async transfer(): Promise<this> {
     this.transferedItem = this.extractedItem;
     return this;
   }
@@ -324,8 +322,7 @@ export class JsonProcessor extends AbstractProcessor implements ProcessorInterfa
   /**
    * @returns {Promise<this>}
    */
-  async load() {
-    assert(false, 'load require override in child class');
-    return this;
+  override async load(): Promise<this> {
+    throw new Error('load require override in child class');
   }
 }

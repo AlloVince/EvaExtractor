@@ -1,6 +1,5 @@
-import { promises as fsPromise } from 'fs';
-import mkdirp from 'mkdirp';
-import path from 'path';
+import { promises as fsPromise } from 'node:fs';
+import path from 'node:path';
 
 export interface StorageInterface {
   store: any;
@@ -27,7 +26,7 @@ export class FileStorage implements StorageInterface {
 
   async write(relative: string, content: string) {
     const localPath = `${this.root}/${relative}`;
-    mkdirp.sync(path.dirname(localPath));
+    await fsPromise.mkdir(path.dirname(localPath), { recursive: true });
     await fsPromise.writeFile(localPath, content);
     return localPath;
   }
