@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { FileStorage } from '../storages';
+import { FileStorage } from '../src/storages';
 
 test('FileStorage.write creates parent directories', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'evaextractor-'));
