@@ -46,6 +46,7 @@ Actions.
 
 - `AGENTS.md` contains the development guide and AI-facing project rules.
 - `docs/AI_DEVELOPMENT_GUIDE.md` keeps the longer project reference used by AI tools.
+- `docs/USAGE_EXAMPLES.md` 提供了基于 `examples/` 的中文使用示例。
 
 ---
 
