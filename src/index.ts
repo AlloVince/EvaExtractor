@@ -231,7 +231,7 @@ export class HtmlProcessor extends AbstractProcessor implements ProcessorInterfa
     this.extractedItem = Object
       .entries(this.getExtractRules())
       .map(
-        ([key, rule]: [string, ExtractRule]) => [key, rule($, this.parsedItem)],
+        ([key, rule]) => [key, typeof rule === 'function' ? rule($, this.parsedItem) : rule],
       )
       .reduce((obj, [k, v]) => ({ ...obj, [k]: v }), {});
     return this;

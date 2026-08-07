@@ -26,7 +26,7 @@ export class FileIterator implements IteratorInterface {
 
 export class MinioIterator implements IteratorInterface {
   minio: any;
-  defaultBucket: string;
+  defaultBucket?: string;
 
   constructor(minio: any, defaultBucket?: string) {
     this.minio = minio;
@@ -55,18 +55,14 @@ export class MinioIterator implements IteratorInterface {
 export class OssIterator implements IteratorInterface {
   oss: any;
   objects: any[];
-  nextMarker: string;
-  cursor: string;
-  count: number;
-  limit: number;
+  nextMarker = '';
+  cursor = '';
+  count = 0;
+  limit = 1000;
 
   constructor(oss: any) {
     this.oss = oss;
     this.objects = [];
-    this.nextMarker = '';
-    this.cursor = null;
-    this.count = 0;
-    this.limit = 1000;
   }
 
   async* getItems(
@@ -116,12 +112,12 @@ export class DatabaseIterator implements IteratorInterface {
     this.limit = limit;
   }
 
-  async* getItems(input: { startCursor: number, whereCondition: object, direction: ORDER } = {
+  async* getItems(input: { startCursor?: number, whereCondition?: object, direction?: ORDER } = {
     startCursor: 0,
     whereCondition: {},
     direction: ORDER.ASC,
   }) {
-    const { startCursor, whereCondition, direction } = input;
+    const { startCursor = 0, whereCondition = {}, direction = ORDER.ASC } = input;
     let offset = startCursor;
     let items = await this.entity.findAll({
       offset,

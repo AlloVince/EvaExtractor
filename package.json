@@ -5,10 +5,10 @@
   "main": "index.js",
   "packageManager": "pnpm@10.14.0",
   "scripts": {
-    "test": "ava --verbose --serial",
-    "lint": "tsc --noEmit",
+    "test": "npm run build && node --test \"lib/test/**/*.js\"",
+    "lint": "eslint .",
     "watch": "tsc -w",
-    "build": "rm -rf lib && tsc"
+    "build": "rm -rf lib && tsc -p tsconfig.build.json"
   },
   "repository": {
     "type": "git",
@@ -21,23 +21,6 @@
   "engines": {
     "node": ">=24.0.0"
   },
-  "ava": {
-    "files": [
-      "test/**/*.ts"
-    ],
-    "sources": [
-      "src/**/*.ts"
-    ],
-    "failFast": false,
-    "tap": false,
-    "require": [
-      "ts-node/register"
-    ],
-    "extensions": [
-      "ts"
-    ],
-    "babel": false
-  },
   "dependencies": {
     "cheerio": "^1.2.0",
     "fast-glob": "^3.3.3"
@@ -47,9 +30,12 @@
     "minio": "^8.0.7"
   },
   "devDependencies": {
+    "@babel/core": "^7.28.3",
+    "@babel/eslint-parser": "^7.28.4",
+    "@babel/plugin-syntax-typescript": "^7.27.1",
+    "@eslint/js": "^9.0.0",
     "@types/node": "^26.1.2",
-    "ava": "^8.0.1",
-    "ts-node": "^10.9.2",
+    "eslint": "^9.0.0",
     "typescript": "^7.0.2"
   }
 }

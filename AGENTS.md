@@ -102,7 +102,7 @@ When touching code, first ask:
 
 ## Testing Expectations
 
-Use the existing AVA test style.
+Use the built-in `node:test` runner for new tests.
 
 - keep tests focused on public behavior
 - add tests for helper functions and deterministic logic
@@ -151,4 +151,3 @@ pnpm run build
 - remove obsolete compatibility code instead of preserving it by default
 - if behavior is ambiguous, inspect the surrounding source before changing it
 - leave a concise note in your final response about what changed and why
-

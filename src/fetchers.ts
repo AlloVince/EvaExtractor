@@ -13,14 +13,14 @@ export class FileFetcher implements FetcherInterface {
   fetcher: any;
 
   async fetch(uri: string): Promise<string> {
-    const fullpath = process.env.FILE_FETCHER_ROOT ?
-      [process.env.FILE_FETCHER_ROOT, uri].join('/') : uri;
+    const root = process.env['FILE_FETCHER_ROOT'];
+    const fullpath = root ? [root, uri].join('/') : uri;
     return fs.readFile(fullpath, 'utf8');
   }
 
   async fetchBuffer(uri: string): Promise<Buffer> {
-    const fullpath = process.env.FILE_FETCHER_ROOT ?
-      [process.env.FILE_FETCHER_ROOT, uri].join('/') : uri;
+    const root = process.env['FILE_FETCHER_ROOT'];
+    const fullpath = root ? [root, uri].join('/') : uri;
     return fs.readFile(fullpath);
   }
 }

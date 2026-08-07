@@ -1,7 +1,11 @@
 export const humanFileSizeToBytes = (str: string): number => {
   const bits = ['b', 'Kb', 'Mb', 'Gb', 'Tb', 'Pb', 'Eb', 'Zb', 'Yb'];
   const bytes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-  const [, num, unit] = str.match(/([\d.]+)([a-zA-Z]+)/);
+  const match = str.match(/([\d.]+)([a-zA-Z]+)/);
+  if (!match) {
+    return Number.NaN;
+  }
+  const [, num, unit] = match;
   if (bytes.includes(unit)) {
     return Number.parseFloat(num) * (1000 ** bytes.indexOf(unit));
   }
