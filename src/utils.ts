@@ -16,12 +16,18 @@ interface HtmlPlusInterface {
   content: string;
 }
 
+const escapeMetaValue = (value: string): string =>
+  value.replace(/\\/g, '\\\\').replace(/\n/g, '\\n');
+
+const unescapeMetaValue = (value: string): string =>
+  value.replace(/\\\\|\\n/g, (match) => (match === '\\n' ? '\n' : '\\'));
+
 export class HtmlPlus {
   static stringify(input: HtmlPlusInterface): string {
     const meta = Object
       .entries(input)
       .filter(([k]) => k !== 'content')
-      .map(([k, v]) => `<!--${k}:${v}-->`)
+      .map(([k, v]) => `<!--${k}:${escapeMetaValue(String(v))}-->`)
       .join('\n');
     return meta ? [meta, input.content].join('\n') : input.content;
   }
@@ -47,7 +53,7 @@ export class HtmlPlus {
     const parsedItem = meta
       .map((line) => {
         const [key, ...values] = line.slice(4, -3).split(':');
-        return [key, values.join(':')];
+        return [key, unescapeMetaValue(values.join(':'))];
       })
       .reduce((obj, [k, v]) => ({ ...obj, [k]: v }), {});
     return Object.assign(
@@ -59,13 +65,18 @@ export class HtmlPlus {
   }
 }
 
-export const hashUrlToPath = (uri: string, depth: number = 3, extension: string = 'html') => {
+export const hashUrlToPath = (
+  uri: string,
+  depth: number = 3,
+  extension: string = 'html',
+): { hash: string, filename: string, folder: string, relative: string } => {
+  const safeDepth = Math.max(0, Math.min(depth, 15));
   const hash = crypto.createHash('md5').update(uri).digest('hex');
   const blockSize = 2;
   const blocks = hash.split('');
   const paths = [];
   let i;
-  for (i = 0; i < depth; i += 1) {
+  for (i = 0; i < safeDepth; i += 1) {
     paths.push(blocks.slice(i * blockSize, (i + 1) * blockSize).join(''));
   }
   const filename = `${blocks.slice(i * blockSize).join('')}.${extension}`;

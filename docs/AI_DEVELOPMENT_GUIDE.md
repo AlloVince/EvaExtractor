@@ -102,7 +102,7 @@ When touching code, first ask:
 
 ## Testing Expectations
 
-Use the existing AVA test style.
+Use the built-in `node:test` runner for new tests.
 
 - keep tests focused on public behavior
 - add tests for helper functions and deterministic logic

@@ -55,3 +55,24 @@ test('humanFileSizeToBytes handles valid and invalid input', () => {
   assert.equal(humanFileSizeToBytes('1Mb'), 125000);
   assert.ok(Number.isNaN(humanFileSizeToBytes('')));
 });
+
+test('humanFileSizeToBytes returns NaN for unknown units', () => {
+  assert.ok(Number.isNaN(humanFileSizeToBytes('1x')));
+  assert.ok(Number.isNaN(humanFileSizeToBytes('1kb')));
+});
+
+test('HtmlPlus round-trips values containing newlines', () => {
+  const input = { key: 'line1\nline2', content: 'body' };
+  assert.deepEqual(HtmlPlus.parse(HtmlPlus.stringify(input)), input);
+});
+
+test('HtmlPlus round-trips values containing backslashes', () => {
+  const input = { key: 'a\\nb', content: 'body' };
+  assert.deepEqual(HtmlPlus.parse(HtmlPlus.stringify(input)), input);
+});
+
+test('hashUrlToPath clamps excessive depth', () => {
+  const result = hashUrlToPath('http://example.com', 20, 'html');
+  assert.equal(result.filename.length > 1, true);
+  assert.equal(result.relative.split('/').length, 16);
+});

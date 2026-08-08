@@ -7,6 +7,7 @@ export enum STORAGES {
   FILE = 'file',
   OSS = 'oss',
   HTTP = 'http',
+  S3 = 's3',
 }
 
 export type Constructor = new (...args: any[]) => any;
@@ -104,6 +105,24 @@ abstract class AbstractProcessor {
     return await this.load();
   }
 
+  protected assertFetched(): void {
+    if (this.fetchedItem === undefined) {
+      throw new Error('fetch() must be called before parse()');
+    }
+  }
+
+  protected assertParsed(): void {
+    if (this.parsedItem === undefined) {
+      throw new Error('parse() must be called before extract()');
+    }
+  }
+
+  protected assertExtracted(): void {
+    if (this.extractedItem === undefined) {
+      throw new Error('extract() must be called before transfer()');
+    }
+  }
+
   getExtractRules(): ExtractRulesInterface {
     return this.extractRules;
   }
@@ -150,6 +169,11 @@ abstract class AbstractProcessor {
 
   getLoadItem(): Record<string, any> {
     return this.loadItem;
+  }
+
+  setLoadItem(item: any): this {
+    this.loadItem = item;
+    return this;
   }
 
   debug(): any[] {
@@ -211,6 +235,7 @@ export class HtmlProcessor extends AbstractProcessor implements ProcessorInterfa
    * @returns {Promise<this>}
    */
   override async parse(): Promise<this> {
+    this.assertFetched();
     const { content } = this.fetchedItem;
     this.parsedItem = Object.assign(
       {
@@ -228,6 +253,7 @@ export class HtmlProcessor extends AbstractProcessor implements ProcessorInterfa
    * @returns {Promise<this>}
    */
   override async extract(): Promise<this> {
+    this.assertParsed();
     const $ = cheerio.load(this.parsedItem.content.toString());
     this.extractedItem = Object
       .entries(this.getExtractRules())
@@ -243,6 +269,7 @@ export class HtmlProcessor extends AbstractProcessor implements ProcessorInterfa
    * @returns {Promise<this>}
    */
   override async transfer(): Promise<this> {
+    this.assertExtracted();
     const rules = this.getTransferRules();
 
     this.transferedItem = Object
@@ -290,6 +317,7 @@ export class JsonProcessor extends AbstractProcessor implements ProcessorInterfa
    * @returns {Promise<this>}
    */
   override async parse(): Promise<this> {
+    this.assertFetched();
     const { content } = this.fetchedItem;
     this.parsedItem = Object.assign(
       {
@@ -307,6 +335,7 @@ export class JsonProcessor extends AbstractProcessor implements ProcessorInterfa
    * @returns {Promise<this>}
    */
   override async extract(): Promise<this> {
+    this.assertParsed();
     this.extractedItem = this.parsedItem;
     return this;
   }
@@ -316,6 +345,7 @@ export class JsonProcessor extends AbstractProcessor implements ProcessorInterfa
    * @returns {Promise<this>}
    */
   override async transfer(): Promise<this> {
+    this.assertExtracted();
     this.transferedItem = this.extractedItem;
     return this;
   }

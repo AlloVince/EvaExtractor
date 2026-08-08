@@ -13,7 +13,8 @@ export class FileIterator implements IteratorInterface {
   async* getItems(
     { prefix, pattern = '**/*.html' }: { prefix: string, pattern?: string },
   ): AsyncIterableIterator<{ file: { name: string | Buffer } }> {
-    const stream = fg.stream([prefix, pattern].join(prefix.endsWith('/') ? '' : '/'));
+    const glob = prefix ? [prefix, pattern].join(prefix.endsWith('/') ? '' : '/') : pattern;
+    const stream = fg.stream(glob);
     for await (const name of stream) {
       yield {
         file: {
@@ -75,6 +76,9 @@ export class OssIterator implements IteratorInterface {
     count: number, pageOffset: number, file: Record<string, unknown>, cursor: string, nextCursor: string,
   }> {
     this.cursor = startCursor;
+    this.count = 0;
+    this.objects = [];
+    this.nextMarker = '';
     ({ objects: this.objects, nextMarker: this.nextMarker } = await this.oss.list({
       prefix,
       marker: startCursor,

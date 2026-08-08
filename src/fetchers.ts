@@ -10,19 +10,26 @@ export interface FetcherInterface {
   fetchBuffer(uri: string): Promise<Buffer>;
 }
 
+const resolveInsideRoot = (root: string | undefined, uri: string): string => {
+  const base = root ? path.resolve(root) : undefined;
+  const full = path.resolve(base ?? process.cwd(), uri);
+  if (base && full !== base && !full.startsWith(`${base}${path.sep}`)) {
+    throw new Error(`refusing to read outside of root: ${uri}`);
+  }
+  return full;
+};
+
 export class FileFetcher implements FetcherInterface {
   fetcher: any;
 
   async fetch(uri: string): Promise<string> {
     const root = process.env['FILE_FETCHER_ROOT'];
-    const fullpath = root ? path.join(root, uri) : uri;
-    return fs.readFile(fullpath, 'utf8');
+    return fs.readFile(resolveInsideRoot(root, uri), 'utf8');
   }
 
   async fetchBuffer(uri: string): Promise<Buffer> {
     const root = process.env['FILE_FETCHER_ROOT'];
-    const fullpath = root ? path.join(root, uri) : uri;
-    return fs.readFile(fullpath);
+    return fs.readFile(resolveInsideRoot(root, uri));
   }
 }
 
@@ -53,12 +60,24 @@ export class HttpFetcher implements FetcherInterface {
 
   async fetch(uri: string): Promise<string> {
     const { body } = await this.fetcher.request(uri);
-    return body;
+    if (typeof body === 'string') {
+      return body;
+    }
+    if (Buffer.isBuffer(body)) {
+      return body.toString();
+    }
+    return streamText(body);
   }
 
   async fetchBuffer(uri: string): Promise<Buffer> {
     const { body } = await this.fetcher.request(uri);
-    return Buffer.from(body);
+    if (typeof body === 'string') {
+      return Buffer.from(body);
+    }
+    if (Buffer.isBuffer(body)) {
+      return body;
+    }
+    return streamBuffer(body);
   }
 }
 

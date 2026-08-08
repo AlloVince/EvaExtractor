@@ -28,6 +28,14 @@ test('FileIterator yields matching html files', async () => {
   }
 });
 
+test('FileIterator with empty prefix uses relative pattern', async () => {
+  const items = [];
+  for await (const item of new FileIterator().getItems({ prefix: '', pattern: 'package.json' })) {
+    items.push(item.file.name);
+  }
+  assert.deepEqual(items, ['package.json']);
+});
+
 test('DatabaseIterator pages through results', async () => {
   const calls: Array<{ offset: number, limit: number }> = [];
   const entity = {
@@ -108,6 +116,26 @@ test('OssIterator stops when reaching max', async () => {
   }
 
   assert.deepEqual(items.map(i => (i['file'] as { name: string }).name), ['a', 'b']);
+});
+
+test('OssIterator resets count between runs', async () => {
+  const oss = {
+    async list() {
+      return { objects: [{ name: 'a' }], nextMarker: '' };
+    },
+  };
+
+  const iterator = new OssIterator(oss);
+  const run = async () => {
+    const counts = [];
+    for await (const item of iterator.getItems({ prefix: '' })) {
+      counts.push(item.count);
+    }
+    return counts;
+  };
+
+  assert.deepEqual(await run(), [0]);
+  assert.deepEqual(await run(), [0]);
 });
 
 test('OssIterator pages until exhausted when max is -1', async () => {

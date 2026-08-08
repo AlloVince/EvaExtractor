@@ -9,5 +9,8 @@ export const humanFileSizeToBytes = (str: string): number => {
   if (bytes.includes(unit)) {
     return Number.parseFloat(num) * (1000 ** bytes.indexOf(unit));
   }
-  return (Number.parseFloat(num) * (1000 ** bits.indexOf(unit))) / 8;
+  if (bits.includes(unit)) {
+    return (Number.parseFloat(num) * (1000 ** bits.indexOf(unit))) / 8;
+  }
+  return Number.NaN;
 };
