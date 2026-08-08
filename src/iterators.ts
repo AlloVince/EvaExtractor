@@ -72,7 +72,7 @@ export class OssIterator implements IteratorInterface {
       max = -1,
     }: { prefix: string, startCursor?: string, max?: number },
   ): AsyncIterableIterator<{
-    count: number, pageOffset: number, file: string, cursor: string, nextCursor: string,
+    count: number, pageOffset: number, file: Record<string, unknown>, cursor: string, nextCursor: string,
   }> {
     this.cursor = startCursor;
     ({ objects: this.objects, nextMarker: this.nextMarker } = await this.oss.list({
@@ -80,7 +80,8 @@ export class OssIterator implements IteratorInterface {
       marker: startCursor,
       'max-keys': this.limit,
     }));
-    while (this.objects.length >= 1 || (max > 0 && this.count > max)) {
+
+    while (this.objects.length >= 1) {
       yield {
         count: this.count,
         pageOffset: this.limit - this.objects.length,
@@ -88,6 +89,13 @@ export class OssIterator implements IteratorInterface {
         cursor: this.cursor,
         nextCursor: this.nextMarker,
       };
+      this.count += 1;
+
+      // Stop early when the caller requested a maximum number of items.
+      if (max > 0 && this.count >= max) {
+        break;
+      }
+
       if (this.objects.length < 1 && this.nextMarker) {
         this.cursor = this.nextMarker;
         ({ objects: this.objects, nextMarker: this.nextMarker } = await this.oss.list({
@@ -96,7 +104,6 @@ export class OssIterator implements IteratorInterface {
           'max-keys': this.limit,
         }));
       }
-      this.count += 1;
     }
   }
 }
@@ -133,7 +140,7 @@ export class DatabaseIterator implements IteratorInterface {
         items = await this.entity.findAll({
           offset,
           where: whereCondition,
-          order: [[this.primaryKey, 'ASC']],
+          order: [[this.primaryKey, direction]],
           limit: this.limit,
         });
       }

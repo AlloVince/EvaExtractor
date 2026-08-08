@@ -37,7 +37,8 @@
   ],
   "packageManager": "pnpm@10.14.0",
   "scripts": {
-    "test": "npm run build && npx tsc -p tsconfig.test.json && node --test \"lib/test/**/*.js\"",
+    "test": "npm run build && npx tsc -p tsconfig.test.json && node --test \".test/**/*.js\"",
+    "prepublishOnly": "npm run build",
     "lint": "eslint .",
     "watch": "tsc -w",
     "build": "rm -rf lib && tsc -p tsconfig.build.json"

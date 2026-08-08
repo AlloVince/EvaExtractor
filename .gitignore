@@ -47,4 +47,5 @@ lib/*
 .nyc_output
 examples/config.local.ts
 index.d.ts
-.pnpm-store/*
+.pnpm-store/*.test
+.test

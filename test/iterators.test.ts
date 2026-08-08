@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { DatabaseIterator, FileIterator, ORDER } from '../src/iterators';
+import { DatabaseIterator, FileIterator, ORDER, OssIterator } from '../src/iterators';
 
 test('FileIterator yields matching html files', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'evaextractor-'));
@@ -59,4 +59,75 @@ test('DatabaseIterator pages through results', async () => {
     { offset: 2, limit: 2 },
     { offset: 4, limit: 2 },
   ]);
+});
+
+test('DatabaseIterator keeps direction on subsequent pages', async () => {
+  const calls: Array<{ offset: number, order: [string, string] }> = [];
+  const entity = {
+    async findAll({ offset, order }: { offset: number, order: [string, string] }) {
+      calls.push({ offset, order });
+      if (offset === 0) {
+        return [{ id: 3 }, { id: 2 }];
+      }
+      if (offset === 2) {
+        return [{ id: 1 }];
+      }
+      return [];
+    },
+  };
+
+  const iterator = new DatabaseIterator(entity, 'id', 2);
+  const results = [];
+  for await (const item of iterator.getItems({
+    startCursor: 0,
+    whereCondition: {},
+    direction: ORDER.DESC,
+  })) {
+    results.push(item);
+  }
+
+  assert.deepEqual(results, [{ id: 3 }, { id: 2 }, { id: 1 }]);
+  // Every page must use the requested direction, not a hardcoded ASC.
+  assert.ok(calls.every(({ order }) => order[0][1] === ORDER.DESC));
+});
+
+test('OssIterator stops when reaching max', async () => {
+  const oss = {
+    async list({ marker }: { marker: string }) {
+      if (marker === '') {
+        return { objects: [{ name: 'a' }, { name: 'b' }, { name: 'c' }], nextMarker: 'page2' };
+      }
+      return { objects: [{ name: 'd' }], nextMarker: '' };
+    },
+  };
+
+  const iterator = new OssIterator(oss);
+  const items = [];
+  for await (const item of iterator.getItems({ prefix: '', max: 2 })) {
+    items.push(item);
+  }
+
+  assert.deepEqual(items.map(i => (i['file'] as { name: string }).name), ['a', 'b']);
+});
+
+test('OssIterator pages until exhausted when max is -1', async () => {
+  let listCalls = 0;
+  const oss = {
+    async list({ marker }: { marker: string }) {
+      listCalls += 1;
+      if (marker === '') {
+        return { objects: [{ name: 'a' }, { name: 'b' }], nextMarker: 'page2' };
+      }
+      return { objects: [{ name: 'c' }], nextMarker: '' };
+    },
+  };
+
+  const iterator = new OssIterator(oss);
+  const items = [];
+  for await (const item of iterator.getItems({ prefix: '', max: -1 })) {
+    items.push(item);
+  }
+
+  assert.deepEqual(items.map(i => (i['file'] as { name: string }).name), ['a', 'b', 'c']);
+  assert.equal(listCalls, 2);
 });

@@ -5,6 +5,7 @@ export default tseslint.config(
   {
     ignores: [
       'lib/**',
+      '.test/**',
       'node_modules/**',
       '*.js',
       '*.cjs',
