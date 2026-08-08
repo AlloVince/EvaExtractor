@@ -8,6 +8,26 @@
     ".": {
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
+    },
+    "./iterators": {
+      "types": "./lib/iterators.d.ts",
+      "default": "./lib/iterators.js"
+    },
+    "./fetchers": {
+      "types": "./lib/fetchers.d.ts",
+      "default": "./lib/fetchers.js"
+    },
+    "./storages": {
+      "types": "./lib/storages.d.ts",
+      "default": "./lib/storages.js"
+    },
+    "./utils": {
+      "types": "./lib/utils.d.ts",
+      "default": "./lib/utils.js"
+    },
+    "./transfers": {
+      "types": "./lib/transfers.d.ts",
+      "default": "./lib/transfers.js"
     }
   },
   "files": [
