@@ -30,7 +30,7 @@
 
 **可选集成**：`ali-oss`、`minio` 为 peerDependencies。
 
-**发布**：CI 在 `master` push 上 test 后 semantic-release（需 `NPM_TOKEN`）。
+**发布**：CI 在 `main` push 上 test 后 semantic-release（需 `NPM_TOKEN`）。
 
 ## 相关
 - 代码：`src/`

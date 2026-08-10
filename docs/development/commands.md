@@ -12,7 +12,7 @@ pnpm run build         # rm -rf lib && tsc -p tsconfig.build.json
 pnpm run watch         # tsc -w
 ```
 
-发布：`prepublishOnly` → build；正式发版由 CI 在 `master` 上 semantic-release（需 `NPM_TOKEN`）。勿在无要求时本地冒充 release。
+发布：`prepublishOnly` → build；正式发版由 CI 在 `main` 上 semantic-release（需 `NPM_TOKEN`）。勿在无要求时本地冒充 release。
 
 ## 相关
 - `setup.md`、`testing.md`

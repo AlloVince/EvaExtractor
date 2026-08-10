@@ -145,7 +145,7 @@ pnpm run lint
 pnpm run build
 ```
 
-CI 在 `master` push 上跑测试后执行 semantic-release（Conventional Commits）；发布需配置 `NPM_TOKEN`。
+CI 在 `main` push 上跑测试后执行 semantic-release（Conventional Commits）；发布需配置 `NPM_TOKEN`。
 
 ## 文档
 

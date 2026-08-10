@@ -35,4 +35,3 @@
 - 代码：`src/index.ts`
 - 测试：`test/processors.test.ts`
 - 示例：`README.md`、`examples/`
-replaceAll

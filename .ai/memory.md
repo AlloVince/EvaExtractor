@@ -17,7 +17,7 @@
 - `FileFetcher` 可用 `FILE_FETCHER_ROOT` 限制读路径；`FileStorage` 构造即 root — 路径穿越已拦（Confirmed）
 - OSS/MinIO 为 peer：未安装时相关路径运行时才炸，勿当 hard dep（Confirmed）
 - 测试先 `tsc -p tsconfig.test.json` 再到 `.test/` 跑 `node --test`；源测在 `test/`，产物在 `.test/`（Confirmed）
-- 发布主干是 `master` 不是 main；`.releaserc.cjs` + CI release job（Confirmed）
+- 发布主干是 `main`；`.releaserc.cjs` + CI release job（Confirmed）
 - `any` 在 ESLint 关闭；外部 SDK 边界允许 any，新增公开 API 仍宜收紧（Confirmed）
 - 对外文档中文；用法示例在 `README.md`（Confirmed，人确认）
 

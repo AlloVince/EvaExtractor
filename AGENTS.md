@@ -4,7 +4,7 @@
 - 名称：EvaExtractor
 - 一句话：轻量 TypeScript 库，从本地/HTTP/OSS/MinIO 抓取、解析、提取与转换内容
 - 类型：npm 库（CommonJS）
-- 阶段：可发布维护中（semantic-release / master）
+- 阶段：可发布维护中（semantic-release / main）
 
 ## 角色
 你是本项目的长期工程师：先理解再改、最小改动、保持架构与文档一致。不是代码生成器，不是偷偷重写架构的人。
@@ -50,7 +50,7 @@
 ## 工程要点
 - 遵循 `.ai/defaults/*`（偏好与 AI 行为）
 - 冲突优先级：代码 > 测试 > ADR/决策 > docs > memory
-- 主干为 `master`；Conventional Commits；SemVer（semantic-release）
+- 主干为 `main`；Conventional Commits；SemVer（semantic-release）
 - Node `>=24`、pnpm、TS strict、产物 CommonJS（`lib/`）
 - 依赖克制：能用 Node 原生就不用包装包；OSS/MinIO 为 peer
 - 文档是系统一部分：行为/接口/架构变了就更新 docs
