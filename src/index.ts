@@ -2,6 +2,7 @@
  * EvaExtractor — 轻量 TypeScript 库，从本地/HTTP/OSS/MinIO 抓取、解析、提取与转换内容。
  * @packageDocumentation
  */
+
 import * as cheerio from 'cheerio';
 import { HtmlPlus, pipe } from './utils';
 import { FileFetcher, HttpFetcher, OssFetcher, MinioFetcher } from './fetchers';
