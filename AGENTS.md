@@ -1,153 +1,72 @@
-# EvaExtractor Agent Guide
+# AGENTS.md
 
-This file is the working reference for AI-assisted development on EvaExtractor.
-It captures the current architecture, coding expectations, and the safest default
-choices for future changes.
+## 身份
+- 名称：EvaExtractor
+- 一句话：轻量 TypeScript 库，从本地/HTTP/OSS/MinIO 抓取、解析、提取与转换内容
+- 类型：npm 库（CommonJS）
+- 阶段：可发布维护中（semantic-release / master）
 
-## Project Purpose
+## 角色
+你是本项目的长期工程师：先理解再改、最小改动、保持架构与文档一致。不是代码生成器，不是偷偷重写架构的人。
 
-EvaExtractor is a small TypeScript toolkit for:
+## 必读（每个 session）
+1. `AGENTS.md`（本文件）
+2. `.ai/defaults/preferences.md`
+3. `.ai/defaults/ai-coding.md`
+4. `.ai/memory.md`
 
-- fetching content from local files, HTTP, Ali OSS, and MinIO
-- parsing HTML metadata embedded by `HtmlPlus`
-- extracting structured data from HTML
-- transferring / transforming extracted output
-- iterating records from file systems, MinIO, OSS, or databases
+## 按需加载
+先看 `docs/index.md`。无 index 时用下表：
+| 任务 | 读 |
+|---|---|
+| 结构/边界/数据流 | `docs/architecture/` |
+| 改某模块 | `docs/components/<module>/`（只读相关模块） |
+| 环境/命令/测试 | `docs/development/` |
+| 用法示例 | `README.md`、`examples/` |
+| 重要决策 | `docs/architecture/adr/` |
+| 对外文档语言 | 中文（README） |
+| 架构级改动 | `.ai/workflow/design-review.md` |
 
-The codebase is intentionally lightweight. Prefer small, targeted changes over large
-framework-style abstractions.
+## 加载规则
+- 只加载当前任务需要的文档；改 A 模块不读 B 模块
+- 先 docs 再代码；禁止无目的整仓扫描
+- 上下文过大：总结已有理解后再继续
+- 详细步骤：`.ai/workflow/start.md`
 
-## Current Runtime Baseline
+## 边界
+**负责：** processors / fetchers / storages / iterators / utils / transfers 的库行为与类型；测试、lint、构建、发布配置；docs 与公开 API 一致
+**不负责：** 业务爬虫/ETL 应用本体；云账号与密钥；部署一整套采集系统；无请求时 ESM 大迁移或改对外方法名语义
 
-- Node.js: `>=24`
-- Package manager: `pnpm`
-- TypeScript: strict mode enabled
-- Module format: CommonJS output
+## 变更分级
+| 规模 | 例子 | 做前 | 做后 |
+|---|---|---|---|
+| 微 | 文案、typo | 直接改 | 极简确认 |
+| 小 | bug、小调整 | 读相关代码/docs | end 检查是否影响 docs |
+| 中 | feature | 简述影响面与风险 | 完整 end；按需 sync |
+| 大 | 架构/边界/核心模型/主技术栈 | design-review 清单 | end + sync + 必要 ADR |
 
-## Core Design
+一次只做一件事。不混杂无关重构、升级与架构变更。
 
-### Main flow
+## 工程要点
+- 遵循 `.ai/defaults/*`（偏好与 AI 行为）
+- 冲突优先级：代码 > 测试 > ADR/决策 > docs > memory
+- 主干为 `master`；Conventional Commits；SemVer（semantic-release）
+- Node `>=24`、pnpm、TS strict、产物 CommonJS（`lib/`）
+- 依赖克制：能用 Node 原生就不用包装包；OSS/MinIO 为 peer
+- 文档是系统一部分：行为/接口/架构变了就更新 docs
 
-`HtmlProcessor` and `JsonProcessor` follow the same pipeline:
+## 禁止
+- 不理解就写；无关文件乱改；静默改架构或公共接口
+- 为假想未来加抽象；无必要加依赖/框架
+- 删测试来「通过」；编造不确定的业务事实
+- 未经要求 git commit
+- 恢复 tslint/nyc 等已淘汰栈（除非明确需求）
 
-1. `fetch()` loads raw content.
-2. `parse()` converts content into a structured payload.
-3. `extract()` maps parsed content into a normalized object.
-4. `transfer()` applies optional value transforms.
-5. `load()` is left to subclasses or consumers.
+## 完成清单
+- [ ] 需求满足且改动最小
+- [ ] 符合现有模式与 defaults
+- [ ] 测试已考虑（`node:test`）
+- [ ] docs/memory 按规模已处理
+- [ ] 无无关变更
 
-### Key modules
-
-- `src/index.ts`
-  - processor classes
-  - processor interfaces
-  - storage and fetcher factory logic
-- `src/fetchers.ts`
-  - fetchers for file, HTTP, OSS, and MinIO
-- `src/storages.ts`
-  - persistence helpers for file, OSS, and MinIO
-- `src/iterators.ts`
-  - async iterators for file, OSS, MinIO, and databases
-- `src/utils.ts`
-  - `HtmlPlus`, `pipe`, and hashing helpers
-
-## TypeScript Conventions
-
-Use modern TypeScript defaults:
-
-- keep `strict` compatibility
-- prefer explicit return types on public methods
-- use `override` on subclass methods
-- initialize class fields or mark them with definite assignment when appropriate
-- prefer `Record<string, ...>` over loose `{}` types
-- avoid `any` unless the external SDK truly forces it
-- prefer native Node APIs over compatibility packages
-
-### Preferred patterns
-
-- use `node:` imports for built-in modules
-- prefer `async`/`await`
-- prefer `Promise`-based Node APIs
-- prefer stable built-in APIs before adding dependencies
-
-### Avoid
-
-- new `tslint` or other deprecated lint stacks
-- reintroducing `nyc` unless coverage tooling becomes necessary again
-- adding dependencies that duplicate Node core behavior
-- expanding the public API without updating the documentation
-
-## Dependency Policy
-
-Default rule: every dependency must earn its place.
-
-### Prefer removal when possible
-
-This project already replaced some historical dependencies with Node core:
-
-- `mkdirp` -> `fs.promises.mkdir(..., { recursive: true })`
-- `get-stream` -> `node:stream/consumers`
-
-When touching code, first ask:
-
-1. Can Node 24 do this natively?
-2. Can the existing dependency already cover it?
-3. Is a new dependency worth the long-term maintenance cost?
-
-### When adding a dependency
-
-- keep it focused and well-maintained
-- prefer packages that ship TypeScript types
-- avoid bringing in transitive complexity just for convenience
-
-## Testing Expectations
-
-Use the built-in `node:test` runner for new tests.
-
-- keep tests focused on public behavior
-- add tests for helper functions and deterministic logic
-- prefer small unit tests over integration-heavy tests unless necessary
-
-### Recommended test targets
-
-- `HtmlPlus.stringify()` / `HtmlPlus.parse()`
-- `hashUrlToPath()`
-- iterator pagination behavior
-- fetcher/storage path handling
-
-## Change Strategy
-
-When making a change:
-
-1. preserve existing public behavior unless the task explicitly changes it
-2. make the smallest coherent fix
-3. update documentation alongside API or behavior changes
-4. avoid unrelated refactors
-5. check whether an old dependency or compatibility layer can be removed
-
-If a change requires behavior tradeoffs, document the tradeoff in the same patch.
-
-## Repository-Specific Notes
-
-- The project is a library, not an app shell.
-- Keep outputs compatible with CommonJS consumers unless the repo is explicitly migrated.
-- The package currently supports optional integrations for Ali OSS and MinIO via peer dependencies.
-
-## Useful Commands
-
-These are the intended local commands once dependencies are installed:
-
-```bash
-pnpm install
-pnpm test
-pnpm run lint
-pnpm run build
-```
-
-## AI Working Rules
-
-- read this guide before editing code
-- prefer the current architecture over inventing a new one
-- remove obsolete compatibility code instead of preserving it by default
-- if behavior is ambiguous, inspect the surrounding source before changing it
-- leave a concise note in your final response about what changed and why
+收工步骤见 `.ai/workflow/end.md`。

@@ -1,65 +1,13 @@
 # EvaExtractor
 
-EvaExtractor is a lightweight TypeScript toolkit for fetching, parsing, extracting,
-and transferring content from local files and object storage backends.
+轻量 TypeScript 工具库：从本地文件与对象存储抓取、解析、提取并转换内容。
 
-It is designed for projects that need to:
-
-- read content from local disk, HTTP, Ali OSS, or MinIO
-- parse HTML metadata with `HtmlPlus`
-- extract structured data from HTML or JSON payloads
-- apply transformation steps before loading or persisting results
-- iterate records from files, object storage, or database sources
-
-## Installation
-
-```bash
-pnpm add evaextractor
-```
-
-If you use the OSS or MinIO integrations, install the matching peer dependency too:
-
-```bash
-pnpm add ali-oss
-pnpm add minio
-```
-
-## Requirements
-
-- Node.js `>=24`
-- pnpm
-
-## Development
-
-```bash
-pnpm install
-pnpm test
-pnpm run lint
-pnpm run build
-```
-
-CI also runs semantic release on `master` pushes, using conventional commits to
-drive versioning and release notes. Publishing requires `NPM_TOKEN` in GitHub
-Actions.
-
-## Documentation
-
-- `AGENTS.md` contains the development guide and AI-facing project rules.
-- `docs/AI_DEVELOPMENT_GUIDE.md` keeps the longer project reference used by AI tools.
-- `docs/USAGE_EXAMPLES.md` 提供了基于 `examples/` 的中文使用示例。
-
----
-
-# EvaExtractor
-
-EvaExtractor 是一个轻量级的 TypeScript 工具库，用于从本地文件和对象存储后端中抓取、解析、提取和转换内容。
-
-它适合这些场景：
+适合这些场景：
 
 - 从本地磁盘、HTTP、阿里云 OSS 或 MinIO 读取内容
 - 使用 `HtmlPlus` 解析 HTML 元数据
-- 从 HTML 或 JSON 数据中提取结构化信息
-- 在加载或持久化之前执行转换步骤
+- 从 HTML 或 JSON 提取结构化信息
+- 在持久化前做字段转换
 - 遍历文件、对象存储或数据库中的记录
 
 ## 安装
@@ -68,7 +16,7 @@ EvaExtractor 是一个轻量级的 TypeScript 工具库，用于从本地文件�
 pnpm add evaextractor
 ```
 
-如果你会使用 OSS 或 MinIO 集成，还需要安装对应的 peer dependency：
+使用 OSS 或 MinIO 时，再安装对应 peer dependency：
 
 ```bash
 pnpm add ali-oss
@@ -80,6 +28,114 @@ pnpm add minio
 - Node.js `>=24`
 - pnpm
 
+## 导入
+
+大多数场景用主入口即可：
+
+```ts
+import { HtmlProcessor, JsonProcessor, STORAGES } from 'evaextractor';
+```
+
+也可按子路径导入：`evaextractor/fetchers`、`evaextractor/storages`、`evaextractor/iterators`、`evaextractor/utils`、`evaextractor/transfers`。
+
+## 使用示例
+
+### HTML 元数据格式
+
+处理器识别文件头连续的 HTML 注释元数据：
+
+```ts
+const content = [
+  '<!--url:https://example.com/article-->',
+  '<!--timestamp:2026-08-07T08:00:00.000Z-->',
+  '<h1>Hello</h1>',
+].join('\n');
+```
+
+### 从 HTML 提取结构化数据
+
+```ts
+import { HtmlProcessor, STORAGES } from 'evaextractor';
+
+const processor = new HtmlProcessor(
+  {
+    storage: STORAGES.FILE,
+    uri: './sample.html',
+  },
+  {
+    async fetch() {
+      return '<!--url:https://example.com--><div class="title">Hello</div>';
+    },
+    async fetchBuffer() {
+      return Buffer.from('');
+    },
+  },
+);
+
+processor.extractRules = {
+  title: ($) => $('div.title').text(),
+};
+
+await processor.process();
+
+console.log(processor.getExtractedItem());
+```
+
+### 解析 JSON
+
+```ts
+import { JsonProcessor, STORAGES } from 'evaextractor';
+
+const processor = new JsonProcessor(
+  {
+    storage: STORAGES.FILE,
+    uri: './sample.json',
+  },
+  {
+    async fetch() {
+      return JSON.stringify({
+        url: 'https://example.com',
+        title: 'Hello',
+      });
+    },
+    async fetchBuffer() {
+      return Buffer.from('');
+    },
+  },
+);
+
+await processor.process();
+
+console.log(processor.getParsedItem());
+```
+
+### MinIO 遍历与读取
+
+```ts
+import Minio from 'minio';
+import { MinioIterator } from 'evaextractor/iterators';
+import { MinioFetcher } from 'evaextractor/fetchers';
+
+const client = new Minio.Client({
+  endPoint: '127.0.0.1',
+  port: 9000,
+  useSSL: false,
+  accessKey: 'minioadmin',
+  secretKey: 'minioadmin',
+});
+
+const iterator = new MinioIterator(client, 'dev');
+const fetcher = new MinioFetcher(client, 'dev');
+
+for await (const item of iterator.getItems({ prefix: '' })) {
+  console.log(item);
+}
+
+console.log(await fetcher.fetch('path/to/object.json'));
+```
+
+更具体的仓库内集成参考见 `examples/`。
+
 ## 开发
 
 ```bash
@@ -89,7 +145,9 @@ pnpm run lint
 pnpm run build
 ```
 
+CI 在 `master` push 上跑测试后执行 semantic-release（Conventional Commits）；发布需配置 `NPM_TOKEN`。
+
 ## 文档
 
-- `AGENTS.md` 包含面向 AI 和维护者的开发规范。
-- `docs/AI_DEVELOPMENT_GUIDE.md` 是更详细的项目参考文档。
+- 对外说明与示例：本 README
+- AI / 维护者入口：`AGENTS.md` → `docs/index.md`
