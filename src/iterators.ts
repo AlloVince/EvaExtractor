@@ -11,7 +11,7 @@ export enum ORDER {
 
 export class FileIterator implements IteratorInterface {
   async* getItems(
-    { prefix, pattern = '**/*.html' }: { prefix: string, pattern?: string },
+    { prefix, pattern = '**/*.html' }: { prefix?: string, pattern?: string },
   ): AsyncIterableIterator<{ file: { name: string | Buffer } }> {
     const glob = prefix ? [prefix, pattern].join(prefix.endsWith('/') ? '' : '/') : pattern;
     const stream = fg.stream(glob);
