@@ -4,6 +4,11 @@ export interface IteratorInterface {
   getItems(input: any): AsyncIterableIterator<any>;
 }
 
+export interface ObjectIteratorItem<TFile = Record<string, unknown>> {
+  file: TFile;
+  cursor: string;
+}
+
 export enum ORDER {
   ASC = 'ASC',
   DESC = 'DESC',
@@ -12,7 +17,7 @@ export enum ORDER {
 export class FileIterator implements IteratorInterface {
   async* getItems(
     { prefix, pattern = '**/*.html' }: { prefix?: string, pattern?: string },
-  ): AsyncIterableIterator<{ file: { name: string | Buffer } }> {
+  ): AsyncIterableIterator<ObjectIteratorItem<{ name: string | Buffer }>> {
     const glob = prefix ? [prefix, pattern].join(prefix.endsWith('/') ? '' : '/') : pattern;
     const stream = fg.stream(glob);
     for await (const name of stream) {
@@ -20,6 +25,7 @@ export class FileIterator implements IteratorInterface {
         file: {
           name,
         },
+        cursor: String(name),
       };
     }
   }
@@ -40,7 +46,7 @@ export class MinioIterator implements IteratorInterface {
       startCursor = '',
       bucket,
     }: { prefix?: string, startCursor?: string, bucket?: string },
-  ): AsyncIterableIterator<{ file: { name: string | Buffer } }> {
+  ): AsyncIterableIterator<ObjectIteratorItem<{ name: string | Buffer }>> {
     const stream = this.minio.listObjectsV2(
       bucket || this.defaultBucket,
       prefix,
@@ -48,7 +54,7 @@ export class MinioIterator implements IteratorInterface {
       startCursor,
     );
     for await (const item of stream) {
-      yield { file: item };
+      yield { file: item, cursor: String(item.name) };
     }
   }
 }
@@ -72,8 +78,8 @@ export class OssIterator implements IteratorInterface {
       startCursor = '',
       max = -1,
     }: { prefix: string, startCursor?: string, max?: number },
-  ): AsyncIterableIterator<{
-    count: number, pageOffset: number, file: Record<string, unknown>, cursor: string, nextCursor: string,
+  ): AsyncIterableIterator<ObjectIteratorItem & {
+    count: number, pageOffset: number, nextCursor: string,
   }> {
     this.cursor = startCursor;
     this.count = 0;

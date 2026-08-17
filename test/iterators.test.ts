@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { DatabaseIterator, FileIterator, ORDER, OssIterator } from '../src/iterators';
+import { DatabaseIterator, FileIterator, MinioIterator, ORDER, OssIterator } from '../src/iterators';
 
 test('FileIterator yields matching html files', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'evaextractor-'));
@@ -16,13 +16,13 @@ test('FileIterator yields matching html files', async () => {
     const iterator = new FileIterator();
     const items = [];
     for await (const item of iterator.getItems({ prefix: root, pattern: '**/*.html' })) {
-      items.push(item.file.name);
+      items.push({ name: item.file.name, cursor: item.cursor });
     }
 
     assert.deepEqual(items.sort(), [
-      path.join(root, 'a.html'),
-      path.join(root, 'nested', 'b.html'),
-    ].sort());
+    { name: path.join(root, 'a.html'), cursor: path.join(root, 'a.html') },
+    { name: path.join(root, 'nested', 'b.html'), cursor: path.join(root, 'nested', 'b.html') },
+  ].sort((a, b) => a.name.localeCompare(b.name)));
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -31,9 +31,28 @@ test('FileIterator yields matching html files', async () => {
 test('FileIterator with empty prefix uses relative pattern', async () => {
   const items = [];
   for await (const item of new FileIterator().getItems({ prefix: '', pattern: 'package.json' })) {
-    items.push(item.file.name);
+    items.push({ name: item.file.name, cursor: item.cursor });
   }
-  assert.deepEqual(items, ['package.json']);
+  assert.deepEqual(items, [{ name: 'package.json', cursor: 'package.json' }]);
+});
+
+test('MinioIterator exposes the object name as cursor', async () => {
+  const minio = {
+    listObjectsV2() {
+      return (async function* objects() {
+        yield { name: 'raw/a.json', size: 1 };
+      })();
+    },
+  };
+  const items = [];
+  for await (const item of new MinioIterator(minio, 'dev').getItems({ prefix: 'raw/' })) {
+    items.push(item);
+  }
+
+  assert.deepEqual(items, [{
+    file: { name: 'raw/a.json', size: 1 },
+    cursor: 'raw/a.json',
+  }]);
 });
 
 test('DatabaseIterator pages through results', async () => {

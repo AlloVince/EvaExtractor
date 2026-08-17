@@ -5,9 +5,9 @@
 
 ## 职责
 - `IteratorInterface`：`getItems(input) → AsyncIterableIterator`
-- `FileIterator`：`fast-glob` 流式匹配 `prefix`+`pattern`（默认 `**/*.html`）
-- `MinioIterator`：`listObjectsV2`，可 override bucket
-- `OssIterator`：`list` 分页（limit 1000）、cursor/nextCursor、可选 `max`
+- `FileIterator`：`fast-glob` 流式匹配 `prefix`+`pattern`（默认 `**/*.html`），产出 `{ file, cursor }`
+- `MinioIterator`：`listObjectsV2`，可 override bucket，产出 `{ file, cursor }`
+- `OssIterator`：`list` 分页（limit 1000），产出 `{ file, cursor, nextCursor, count, pageOffset }`，支持 `max`
 - `DatabaseIterator`：对 `entity.findAll` 做 offset 分页；`ORDER` ASC/DESC
 
 ## 边界
@@ -23,7 +23,7 @@
 - 可选 minio / ali-oss；DB entity 需提供 `findAll`
 
 ## 雷区
-- 各 iterator 的 yield 结构不一致（File/Minio 偏 `{file}`；Oss 带 count/cursor；DB 直接 entity）
+- 文件/对象存储 iterator 统一产出 `file` 和 `cursor`；`OssIterator` 额外产出分页信息；`DatabaseIterator` 保持直接产出 entity 的既有语义
 - `DatabaseIterator` 语义绑定 Sequelize 风格；换 ORM 需适配层
 - Oss 内部状态在实例上（cursor/objects），并发共用同一实例不安全（Assumed 使用方式）
 
