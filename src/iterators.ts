@@ -1,4 +1,5 @@
 import fg from 'fast-glob';
+import { Op } from 'sequelize';
 
 export interface IteratorInterface {
   getItems(input: any): AsyncIterableIterator<any>;
@@ -138,8 +139,8 @@ export class DatabaseIterator implements IteratorInterface {
     let lastSeenId = startCursor;
     let items = await this.entity.findAll({
       where: { ...whereCondition, [this.primaryKey]: direction === ORDER.ASC
-        ? { $gt: lastSeenId }
-        : { $lt: lastSeenId } },
+        ? { [Op.gt]: lastSeenId }
+        : { [Op.lt]: lastSeenId } },
       order: [[this.primaryKey, direction]],
       limit: this.limit,
     });
@@ -151,8 +152,8 @@ export class DatabaseIterator implements IteratorInterface {
       if (items.length < 1) {
         items = await this.entity.findAll({
           where: { ...whereCondition, [this.primaryKey]: direction === ORDER.ASC
-            ? { $gt: lastSeenId }
-            : { $lt: lastSeenId } },
+            ? { [Op.gt]: lastSeenId }
+            : { [Op.lt]: lastSeenId } },
           order: [[this.primaryKey, direction]],
           limit: this.limit,
         });
