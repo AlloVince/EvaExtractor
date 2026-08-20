@@ -55,22 +55,24 @@ test('MinioIterator exposes the object name as cursor', async () => {
   }]);
 });
 
-test('DatabaseIterator pages through results', async () => {
-  const calls: Array<{ offset: number, limit: number }> = [];
+test('DatabaseIterator pages through results using cursor', async () => {
+  const calls: Array<{ where: Record<string, object>, order: [string, string], limit: number }> = [];
   const entity = {
-    async findAll({ offset, limit }: { offset: number, limit: number }) {
-      calls.push({ offset, limit });
-      if (offset === 0) {
+    pk: 'id',
+    async findAll({ where, order, limit }: { where: Record<string, object>, order: [string, string], limit: number }) {
+      calls.push({ where, order, limit });
+      const gt = (where[entity.pk] as Record<string, unknown>)['$gt'] as number | undefined;
+      if (gt === 0) {
         return [{ id: 1 }, { id: 2 }];
       }
-      if (offset === 2) {
+      if (gt === 2) {
         return [{ id: 3 }];
       }
       return [];
     },
   };
 
-  const iterator = new DatabaseIterator(entity, 'id', 2);
+  const iterator = new DatabaseIterator(entity as any, 'id', 2);
   const results = [];
   for await (const item of iterator.getItems({
     startCursor: 0,
@@ -82,28 +84,30 @@ test('DatabaseIterator pages through results', async () => {
 
   assert.deepEqual(results, [{ id: 1 }, { id: 2 }, { id: 3 }]);
   assert.deepEqual(calls, [
-    { offset: 0, limit: 2 },
-    { offset: 2, limit: 2 },
-    { offset: 4, limit: 2 },
+    { where: { id: { $gt: 0 } }, order: [['id', 'ASC']], limit: 2 },
+    { where: { id: { $gt: 2 } }, order: [['id', 'ASC']], limit: 2 },
+    { where: { id: { $gt: 3 } }, order: [['id', 'ASC']], limit: 2 },
   ]);
 });
 
-test('DatabaseIterator keeps direction on subsequent pages', async () => {
-  const calls: Array<{ offset: number, order: [string, string] }> = [];
+test('DatabaseIterator uses cursor for DESC direction', async () => {
+  const calls: Array<{ where: Record<string, object>, order: [string, string][], limit: number }> = [];
   const entity = {
-    async findAll({ offset, order }: { offset: number, order: [string, string] }) {
-      calls.push({ offset, order });
-      if (offset === 0) {
+    pk: 'id',
+    async findAll({ where, order, limit }: { where: Record<string, object>, order: [string, string][], limit: number }) {
+      calls.push({ where, order, limit });
+      const lt = (where[entity.pk] as Record<string, unknown>)['$lt'] as number | undefined;
+      if (lt === 0) {
         return [{ id: 3 }, { id: 2 }];
       }
-      if (offset === 2) {
+      if (lt === 2) {
         return [{ id: 1 }];
       }
       return [];
     },
   };
 
-  const iterator = new DatabaseIterator(entity, 'id', 2);
+  const iterator = new DatabaseIterator(entity as any, 'id', 2);
   const results = [];
   for await (const item of iterator.getItems({
     startCursor: 0,
@@ -114,8 +118,70 @@ test('DatabaseIterator keeps direction on subsequent pages', async () => {
   }
 
   assert.deepEqual(results, [{ id: 3 }, { id: 2 }, { id: 1 }]);
-  // Every page must use the requested direction, not a hardcoded ASC.
-  assert.ok(calls.every(({ order }) => order[0][1] === ORDER.DESC));
+  assert.ok(calls.every(({ order }) => order[0][1] === ORDER.DESC), 'Every call must use DESC direction');
+  assert.ok(calls.every(({ where }) => '$lt' in (where[entity.pk] as Record<string, unknown>)), 'Every call must use $lt for DESC');
+});
+
+test('DatabaseIterator starts from startCursor', async () => {
+  const calls: Array<{ where: Record<string, object>, limit: number }> = [];
+  const entity = {
+    pk: 'id',
+    async findAll({ where, limit }: { where: Record<string, object>, limit: number }) {
+      calls.push({ where, limit });
+      const gt = (where[entity.pk] as Record<string, unknown>)['$gt'] as number | undefined;
+      if (gt === 5) {
+        return [{ id: 6 }, { id: 7 }];
+      }
+      if (gt === 7) {
+        return [{ id: 8 }];
+      }
+      return [];
+    },
+  };
+
+  const iterator = new DatabaseIterator(entity as any, 'id', 2);
+  const results = [];
+  for await (const item of iterator.getItems({
+    startCursor: 5,
+    whereCondition: {},
+    direction: ORDER.ASC,
+  })) {
+    results.push(item);
+  }
+
+  assert.deepEqual(results, [{ id: 6 }, { id: 7 }, { id: 8 }]);
+  assert.equal((calls[0].where[entity.pk] as Record<string, unknown>)['$gt'], 5);
+});
+
+test('DatabaseIterator merges whereCondition with cursor', async () => {
+  const calls: Array<{ where: Record<string, object>, limit: number }> = [];
+  const entity = {
+    pk: 'id',
+    async findAll({ where, limit }: { where: Record<string, object>, limit: number }) {
+      calls.push({ where, limit });
+      const gt = (where[entity.pk] as Record<string, unknown>)['$gt'] as number | undefined;
+      if (gt === 0) {
+        return [{ id: 1, status: 'active' }];
+      }
+      return [];
+    },
+  };
+
+  const iterator = new DatabaseIterator(entity as any, 'id', 2);
+  const results = [];
+  for await (const item of iterator.getItems({
+    startCursor: 0,
+    whereCondition: { status: 'active' },
+    direction: ORDER.ASC,
+  })) {
+    results.push(item);
+  }
+
+  assert.deepEqual(results, [{ id: 1, status: 'active' }]);
+  const firstWhere = calls[0].where;
+  assert.ok('id' in firstWhere, 'whereCondition must include id cursor');
+  assert.ok('status' in firstWhere, 'whereCondition must include original filter');
+  assert.equal(firstWhere['status'], 'active');
 });
 
 test('OssIterator stops when reaching max', async () => {

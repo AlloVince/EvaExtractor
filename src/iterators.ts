@@ -135,21 +135,24 @@ export class DatabaseIterator implements IteratorInterface {
     direction: ORDER.ASC,
   }) {
     const { startCursor = 0, whereCondition = {}, direction = ORDER.ASC } = input;
-    let offset = startCursor;
+    let lastSeenId = startCursor;
     let items = await this.entity.findAll({
-      offset,
-      where: whereCondition,
+      where: { ...whereCondition, [this.primaryKey]: direction === ORDER.ASC
+        ? { $gt: lastSeenId }
+        : { $lt: lastSeenId } },
       order: [[this.primaryKey, direction]],
       limit: this.limit,
     });
 
     while (items.length > 0) {
-      yield items.shift();
+      const item = items.shift();
+      yield item;
+      lastSeenId = item[this.primaryKey];
       if (items.length < 1) {
-        offset += this.limit;
         items = await this.entity.findAll({
-          offset,
-          where: whereCondition,
+          where: { ...whereCondition, [this.primaryKey]: direction === ORDER.ASC
+            ? { $gt: lastSeenId }
+            : { $lt: lastSeenId } },
           order: [[this.primaryKey, direction]],
           limit: this.limit,
         });

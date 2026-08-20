@@ -8,7 +8,7 @@
 - `FileIterator`：`fast-glob` 流式匹配 `prefix`+`pattern`（默认 `**/*.html`），产出 `{ file, cursor }`
 - `MinioIterator`：`listObjectsV2`，可 override bucket，产出 `{ file, cursor }`
 - `OssIterator`：`list` 分页（limit 1000），产出 `{ file, cursor, nextCursor, count, pageOffset }`，支持 `max`
-- `DatabaseIterator`：对 `entity.findAll` 做 offset 分页；`ORDER` ASC/DESC
+- `DatabaseIterator`：对 `entity.findAll` 做 keyset 分页（cursor-based，`$gt`/`$lt`）；`ORDER` ASC/DESC
 
 ## 边界
 - 产出「有哪些条目」，默认不拉取文件正文
