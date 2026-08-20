@@ -5,6 +5,12 @@ import path from 'node:path';
 import test from 'node:test';
 import { DatabaseIterator, FileIterator, MinioIterator, ORDER, OssIterator } from '../src/iterators';
 
+// Construct Op symbols locally instead of importing from sequelize,
+// matching what Sequelize uses internally.
+const Op: Record<string, symbol> = { gt: Symbol('gt'), lt: Symbol('lt') };
+
+function op(key: string): symbol { return Op[key]; }
+
 test('FileIterator yields matching html files', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'evaextractor-'));
   try {
@@ -58,10 +64,11 @@ test('MinioIterator exposes the object name as cursor', async () => {
 test('DatabaseIterator pages through results using cursor', async () => {
   const calls: Array<{ where: Record<string, object>, order: [string, string], limit: number }> = [];
   const entity = {
+    sequelize: { constructor: { Op } },
     pk: 'id',
     async findAll({ where, order, limit }: { where: Record<string, object>, order: [string, string], limit: number }) {
       calls.push({ where, order, limit });
-      const gt = (where[entity.pk] as Record<string, unknown>)['$gt'] as number | undefined;
+      const gt = (where[entity.pk] as Record<PropertyKey, unknown>)[op('gt')] as number | undefined;
       if (gt === 0) {
         return [{ id: 1 }, { id: 2 }];
       }
@@ -84,19 +91,20 @@ test('DatabaseIterator pages through results using cursor', async () => {
 
   assert.deepEqual(results, [{ id: 1 }, { id: 2 }, { id: 3 }]);
   assert.deepEqual(calls, [
-    { where: { id: { $gt: 0 } }, order: [['id', 'ASC']], limit: 2 },
-    { where: { id: { $gt: 2 } }, order: [['id', 'ASC']], limit: 2 },
-    { where: { id: { $gt: 3 } }, order: [['id', 'ASC']], limit: 2 },
+    { where: { id: { [op('gt')]: 0 } }, order: [['id', 'ASC']], limit: 2 },
+    { where: { id: { [op('gt')]: 2 } }, order: [['id', 'ASC']], limit: 2 },
+    { where: { id: { [op('gt')]: 3 } }, order: [['id', 'ASC']], limit: 2 },
   ]);
 });
 
 test('DatabaseIterator uses cursor for DESC direction', async () => {
   const calls: Array<{ where: Record<string, object>, order: [string, string][], limit: number }> = [];
   const entity = {
+    sequelize: { constructor: { Op } },
     pk: 'id',
     async findAll({ where, order, limit }: { where: Record<string, object>, order: [string, string][], limit: number }) {
       calls.push({ where, order, limit });
-      const lt = (where[entity.pk] as Record<string, unknown>)['$lt'] as number | undefined;
+      const lt = (where[entity.pk] as Record<PropertyKey, unknown>)[op('lt')] as number | undefined;
       if (lt === 0) {
         return [{ id: 3 }, { id: 2 }];
       }
@@ -119,16 +127,17 @@ test('DatabaseIterator uses cursor for DESC direction', async () => {
 
   assert.deepEqual(results, [{ id: 3 }, { id: 2 }, { id: 1 }]);
   assert.ok(calls.every(({ order }) => order[0][1] === ORDER.DESC), 'Every call must use DESC direction');
-  assert.ok(calls.every(({ where }) => '$lt' in (where[entity.pk] as Record<string, unknown>)), 'Every call must use $lt for DESC');
+  assert.ok(calls.every(({ where }) => op('lt') in (where[entity.pk] as Record<PropertyKey, unknown>)), 'Every call must use Op.lt for DESC');
 });
 
 test('DatabaseIterator starts from startCursor', async () => {
   const calls: Array<{ where: Record<string, object>, limit: number }> = [];
   const entity = {
+    sequelize: { constructor: { Op } },
     pk: 'id',
     async findAll({ where, limit }: { where: Record<string, object>, limit: number }) {
       calls.push({ where, limit });
-      const gt = (where[entity.pk] as Record<string, unknown>)['$gt'] as number | undefined;
+      const gt = (where[entity.pk] as Record<PropertyKey, unknown>)[op('gt')] as number | undefined;
       if (gt === 5) {
         return [{ id: 6 }, { id: 7 }];
       }
@@ -150,16 +159,17 @@ test('DatabaseIterator starts from startCursor', async () => {
   }
 
   assert.deepEqual(results, [{ id: 6 }, { id: 7 }, { id: 8 }]);
-  assert.equal((calls[0].where[entity.pk] as Record<string, unknown>)['$gt'], 5);
+  assert.equal((calls[0].where[entity.pk] as Record<PropertyKey, unknown>)[op('gt')], 5);
 });
 
 test('DatabaseIterator merges whereCondition with cursor', async () => {
   const calls: Array<{ where: Record<string, object>, limit: number }> = [];
   const entity = {
+    sequelize: { constructor: { Op } },
     pk: 'id',
     async findAll({ where, limit }: { where: Record<string, object>, limit: number }) {
       calls.push({ where, limit });
-      const gt = (where[entity.pk] as Record<string, unknown>)['$gt'] as number | undefined;
+      const gt = (where[entity.pk] as Record<PropertyKey, unknown>)[op('gt')] as number | undefined;
       if (gt === 0) {
         return [{ id: 1, status: 'active' }];
       }

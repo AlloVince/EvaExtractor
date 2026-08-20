@@ -8,7 +8,7 @@
 - `FileIterator`：`fast-glob` 流式匹配 `prefix`+`pattern`（默认 `**/*.html`），产出 `{ file, cursor }`
 - `MinioIterator`：`listObjectsV2`，可 override bucket，产出 `{ file, cursor }`
 - `OssIterator`：`list` 分页（limit 1000），产出 `{ file, cursor, nextCursor, count, pageOffset }`，支持 `max`
-- `DatabaseIterator`：对 `entity.findAll` 做 keyset 分页（cursor-based，`$gt`/`$lt`）；`ORDER` ASC/DESC
+- `DatabaseIterator`：对 `entity.findAll` 做 keyset 分页（cursor-based，`Op.gt`/`Op.lt`）；`ORDER` ASC/DESC
 
 ## 边界
 - 产出「有哪些条目」，默认不拉取文件正文
@@ -20,7 +20,7 @@
 
 ## 依赖
 - `fast-glob`（File）
-- 可选 minio / ali-oss；DB entity 需提供 `findAll`
+- 可选 minio / ali-oss；DB entity 需提供 `findAll`（Sequelize 风格，通过 entity.sequelize 获取 Op）
 
 ## 雷区
 - 文件/对象存储 iterator 统一产出 `file` 和 `cursor`；`OssIterator` 额外产出分页信息；`DatabaseIterator` 保持直接产出 entity 的既有语义

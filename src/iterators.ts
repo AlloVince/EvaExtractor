@@ -122,11 +122,13 @@ export class DatabaseIterator implements IteratorInterface {
   entity: any;
   primaryKey: string;
   limit: number;
+  #Op: Record<string, symbol>;
 
   constructor(entity: any, primaryKey = 'id', limit = 100) {
     this.entity = entity;
     this.primaryKey = primaryKey;
     this.limit = limit;
+    this.#Op = entity.sequelize.constructor.Op;
   }
 
   async* getItems(input: { startCursor?: number, whereCondition?: object, direction?: ORDER } = {
@@ -138,8 +140,8 @@ export class DatabaseIterator implements IteratorInterface {
     let lastSeenId = startCursor;
     let items = await this.entity.findAll({
       where: { ...whereCondition, [this.primaryKey]: direction === ORDER.ASC
-        ? { $gt: lastSeenId }
-        : { $lt: lastSeenId } },
+        ? { [this.#Op['gt']]: lastSeenId }
+        : { [this.#Op['lt']]: lastSeenId } },
       order: [[this.primaryKey, direction]],
       limit: this.limit,
     });
@@ -151,8 +153,8 @@ export class DatabaseIterator implements IteratorInterface {
       if (items.length < 1) {
         items = await this.entity.findAll({
           where: { ...whereCondition, [this.primaryKey]: direction === ORDER.ASC
-            ? { $gt: lastSeenId }
-            : { $lt: lastSeenId } },
+            ? { [this.#Op['gt']]: lastSeenId }
+            : { [this.#Op['lt']]: lastSeenId } },
           order: [[this.primaryKey, direction]],
           limit: this.limit,
         });

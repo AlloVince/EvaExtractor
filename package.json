@@ -60,6 +60,7 @@
   },
   "peerDependencies": {
     "ali-oss": "^6.23.0",
+    "sequelize": "^6.37.8",
     "minio": "^8.0.7"
   },
   "devDependencies": {
